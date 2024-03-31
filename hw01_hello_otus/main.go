@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/fixme_my_friend/hw01_hello_otus/service"
+	"fmt"
+
+	"golang.org/x/example/hello/reverse"
 )
 
 func main() {
-	service.OutputResult("Hello, OTUS!")
+	fmt.Println(reverse.String("Hello, OTUS!"))
 }

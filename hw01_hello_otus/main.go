@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/fixme_my_friend/hw01_hello_otus/service"
+)
+
 func main() {
-	// Place your code here.
+	service.OutputResult("Hello, OTUS!")
 }

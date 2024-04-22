@@ -2,7 +2,6 @@ package hw02unpackstring
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,19 +13,23 @@ func Unpack(input string) (string, error) {
 
 	result := strings.Builder{}
 
+	// digit regexp
 	re, _ := regexp.Compile(`[0-9]{1}`)
+
+	// Find all substring indexes devided by digits
 	indexes := re.FindAllStringSubmatchIndex(input, -1)
 
 	lastIndex := 0
 
-	fmt.Println(indexes)
 	for _, indexPair := range indexes {
 		substring := input[lastIndex:indexPair[1]]
 
 		processedSubString, err := processSubstring(substring)
 
 		if err != nil {
+
 			if processedSubString != "" {
+				// Handle case if substing ends on escaped digit, (join with next substring).
 				continue
 			} else {
 				return "", err
@@ -35,11 +38,20 @@ func Unpack(input string) (string, error) {
 		lastIndex = indexPair[1]
 		result.WriteString(processedSubString)
 	}
+
+	// Parse last part if exists
 	if lastIndex < len(input) {
 
 		processedSubString, err := processSubstring(input[lastIndex:])
 		if err != nil {
-			result.WriteString(processedSubString)
+
+			// Handle case if substing ends on escaped digit, (no need join with next substring because of it's last one)
+			if processedSubString != "" {
+				result.WriteString(processedSubString)
+			} else {
+				return "", err
+			}
+
 		} else {
 			result.WriteString(processedSubString)
 		}
@@ -48,31 +60,33 @@ func Unpack(input string) (string, error) {
 	return result.String(), nil
 }
 
+// handle substing by symbols
 func processSubstring(substring string) (string, error) {
+
 	result := strings.Builder{}
 
 	s := strings.Split(substring, "")
+
+	// Used if there is escaped char, so we skip adding / char to stringBuilder
 	needEscape := false
 
 	for i, symbol := range s {
 
 		_, digitError := strconv.Atoi(symbol)
-
 		isNextLast := i == len(s)-2
 		isLast := i == len(s)-1
 
+		// Handle case if non-escaped digit is located not in the end of substrings
 		if digitError == nil && !needEscape {
-
 			return "", ErrInvalidString
 		}
 
-		if isLast && i >= 0 {
-			fmt.Println(i)
+		if isLast {
 			if needEscape && digitError == nil {
 				result.WriteString(symbol)
+				// Handle case if there are escaped digit in the end of substring
 				return result.String(), errors.New("string should be extended by new chank")
 			}
-
 			result.WriteString(symbol)
 			return result.String(), nil
 		}
@@ -87,8 +101,10 @@ func processSubstring(substring string) (string, error) {
 		needEscape = !needEscape && symbol == "\\" && (nextSymbol == "\\" || nextDigitError == nil)
 
 		if needEscape {
+			// Skip writing the symbol to StringBuilder
 			continue
 		} else {
+			// Handle non-escaped digit in the end of substrings
 			if isNextLast && nextDigitError == nil {
 				result.WriteString(strings.Repeat(symbol, nextDigit))
 				return result.String(), nil

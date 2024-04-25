@@ -1,8 +1,15 @@
 package hw03frequencyanalysis
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
+
+var reg = regexp.MustCompile(`([-]*[a-zа-я]+[-]*[a-zа-я]*[-]*)|([--]{2,})`)
 
 func Top10(input string) []string {
+
+	input = strings.ToLower(input)
 
 	words := strings.Fields(input)
 
@@ -10,12 +17,18 @@ func Top10(input string) []string {
 
 	for _, word := range words {
 
-		value, isPresent := wordsCountMap[word]
+		fixedWord := processWord(word)
+
+		if fixedWord == "" {
+			continue
+		}
+
+		value, isPresent := wordsCountMap[fixedWord]
 
 		if isPresent {
-			wordsCountMap[word] = value + 1
+			wordsCountMap[fixedWord] = value + 1
 		} else {
-			wordsCountMap[word] = 1
+			wordsCountMap[fixedWord] = 1
 		}
 	}
 
@@ -51,5 +64,9 @@ func sortTop10(wordsCountMap map[string]int) []string {
 		result = append(result, topKey)
 	}
 	return result
+}
 
+func processWord(word string) string {
+
+	return reg.FindString(word)
 }

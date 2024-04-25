@@ -8,7 +8,6 @@ import (
 var reg = regexp.MustCompile(`([-]*[a-zа-я]+[-]*[a-zа-я]*[-]*)|([--]{2,})`)
 
 func Top10(input string) []string {
-
 	input = strings.ToLower(input)
 
 	words := strings.Fields(input)
@@ -16,7 +15,6 @@ func Top10(input string) []string {
 	wordsCountMap := make(map[string]int)
 
 	for _, word := range words {
-
 		fixedWord := processWord(word)
 
 		if fixedWord == "" {
@@ -36,7 +34,6 @@ func Top10(input string) []string {
 }
 
 func sortTop10(wordsCountMap map[string]int) []string {
-
 	result := make([]string, 0, 10)
 
 	maxLen := 10
@@ -46,7 +43,6 @@ func sortTop10(wordsCountMap map[string]int) []string {
 	}
 
 	for i := 0; i < maxLen; i++ {
-
 		topKey := ""
 		topValue := 0
 
@@ -67,6 +63,5 @@ func sortTop10(wordsCountMap map[string]int) []string {
 }
 
 func processWord(word string) string {
-
 	return reg.FindString(word)
 }

@@ -19,16 +19,37 @@ func Top10(input string) []string {
 		}
 	}
 
-	return nil
+	return sortTop10(wordsCountMap)
 }
 
 func sortTop10(wordsCountMap map[string]int) []string {
 
 	result := make([]string, 0, 10)
 
-	for i := 0; i < 10; i++ {
+	maxLen := 10
 
+	if maxLen > len(wordsCountMap) {
+		maxLen = len(wordsCountMap)
 	}
-	return nil
+
+	for i := 0; i < maxLen; i++ {
+
+		topKey := ""
+		topValue := 0
+
+		for k, v := range wordsCountMap {
+			if v > topValue {
+				topKey = k
+				topValue = v
+			} else if v == topValue && k < topKey {
+				topKey = k
+				topValue = v
+			}
+		}
+
+		delete(wordsCountMap, topKey)
+		result = append(result, topKey)
+	}
+	return result
 
 }

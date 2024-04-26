@@ -5,7 +5,10 @@ import (
 	"strings"
 )
 
-var reg = regexp.MustCompile(`([-]*[a-zа-я]+[-]*[a-zа-я]*[-]*)|([--]{2,})`)
+var (
+	pMarksOnlyRegexp  = regexp.MustCompile(`^[!?",.:;_-][!?",.:_-]*[!?",.:;_-]$`)
+	pMarksCleanRegexp = regexp.MustCompile(`[0-9a-zа-я]+([!?",.:;_-]*[0-9a-zа-я])*`)
+)
 
 func Top10(input string) []string {
 	input = strings.ToLower(input)
@@ -34,18 +37,20 @@ func Top10(input string) []string {
 }
 
 func sortTop10(wordsCountMap map[string]int) []string {
-	result := make([]string, 0, 10)
-
+	// Length of result slice
 	maxLen := 10
 
-	if maxLen > len(wordsCountMap) {
+	if len(wordsCountMap) < 10 {
 		maxLen = len(wordsCountMap)
 	}
+
+	result := make([]string, 0, maxLen)
 
 	for i := 0; i < maxLen; i++ {
 		topKey := ""
 		topValue := 0
 
+		// Get top value
 		for k, v := range wordsCountMap {
 			if v > topValue {
 				topKey = k
@@ -56,6 +61,7 @@ func sortTop10(wordsCountMap map[string]int) []string {
 			}
 		}
 
+		// Exclude top values from next iterations
 		delete(wordsCountMap, topKey)
 		result = append(result, topKey)
 	}
@@ -63,5 +69,11 @@ func sortTop10(wordsCountMap map[string]int) []string {
 }
 
 func processWord(word string) string {
-	return reg.FindString(word)
+	// Check if word contains punctuation marks only (2+ symbols)
+	if pMarksOnlyRegexp.MatchString(word) {
+		return word
+	}
+
+	// Clean punctuation marks before and after the word
+	return pMarksCleanRegexp.FindString(word)
 }

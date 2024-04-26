@@ -1,6 +1,7 @@
 package hw03frequencyanalysis
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -43,6 +44,13 @@ var text = `Как видите, он  спускается  по  лестни�
 	посидеть у огня и послушать какую-нибудь интересную сказку.
 		В этот вечер...`
 
+var additionalTestText = `
+- - - - - - - 
+-- -- --- ---
+-hey-hey- ,hey-hey:, ?:-hey-hey:,  hey--hey
+,a ,,a ,?a- ,?a-,, a--
+`
+
 func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
@@ -63,6 +71,7 @@ func TestTop10(t *testing.T) {
 				"не",        // 4
 			}
 			require.Equal(t, expected, Top10(text))
+			fmt.Println(Top10(additionalTestText))
 		} else {
 			expected := []string{
 				"он",        // 8
@@ -78,5 +87,15 @@ func TestTop10(t *testing.T) {
 			}
 			require.Equal(t, expected, Top10(text))
 		}
+	})
+	t.Run("additional test with asterisk", func(t *testing.T) {
+		expected := []string{
+			"a",        // 8
+			"hey-hey",  // 3
+			"--",       // 2
+			"---",      // 2
+			"hey--hey", // 1
+		}
+		require.Equal(t, expected, Top10(additionalTestText))
 	})
 }

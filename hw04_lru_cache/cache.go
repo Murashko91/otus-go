@@ -25,16 +25,17 @@ type ListItemData struct {
 func (c *lruCache) Set(key Key, value interface{}) bool {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
+
 	item, ok := c.items[key]
 	itemData := ListItemData{value, key}
+
 	if ok {
 		item.Value = itemData
 		c.queue.MoveToFront(item)
 	} else {
 		if len(c.items) == c.capacity {
 			lastItem := c.queue.Back()
-			lastItemData := lastItem.Value.(ListItemData)
-			lastItemKey := lastItemData.key
+			lastItemKey := lastItem.Value.(ListItemData).key
 			delete(c.items, lastItemKey)
 			c.queue.Remove(lastItem)
 		}
@@ -68,11 +69,10 @@ func (c *lruCache) Clear() {
 }
 
 func NewCache(capacity int) Cache {
-	var mutex sync.Mutex
 	return &lruCache{
 		capacity: capacity,
 		queue:    NewList(),
 		items:    make(map[Key]*ListItem, capacity),
-		mutex:    &mutex,
+		mutex:    &sync.Mutex{},
 	}
 }

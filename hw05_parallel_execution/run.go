@@ -12,8 +12,8 @@ type Task func() error
 type workContext struct {
 	tasks     []Task
 	mu        *sync.Mutex
-	errorsNum int
-	tNumber   int
+	errCount  int
+	taskCount int
 	wg        *sync.WaitGroup
 }
 
@@ -29,7 +29,7 @@ func Run(tasks []Task, n, m int) error {
 	}
 	wg.Wait()
 
-	if wc.errorsNum >= m && errorLimitEnabled {
+	if wc.errCount >= m && errorLimitEnabled {
 		return ErrErrorsLimitExceeded
 	}
 
@@ -39,15 +39,15 @@ func Run(tasks []Task, n, m int) error {
 func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
 	for {
 		wc.mu.Lock()
-		errLimit := wc.errorsNum >= maxErr
+		errLimit := wc.errCount >= maxErr
 
 		// Desable error limit validation for m <= 0
 		if !errorLimitEnabled {
 			errLimit = false
 		}
-		taskIndex := wc.tNumber
+		taskIndex := wc.taskCount
 		tasksCompleated := taskIndex > len(wc.tasks)-1
-		wc.tNumber++
+		wc.taskCount++
 
 		if errLimit || tasksCompleated {
 			wc.mu.Unlock()
@@ -60,7 +60,7 @@ func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
 
 		if err != nil && errorLimitEnabled {
 			wc.mu.Lock()
-			wc.errorsNum++
+			wc.errCount++
 			wc.mu.Unlock()
 		}
 	}

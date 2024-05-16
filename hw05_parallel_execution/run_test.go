@@ -98,17 +98,23 @@ func TestRun(t *testing.T) {
 		workersCount := 5
 		maxErrorsCount := 1
 
+		mu := &sync.Mutex{}
+
 		executionState := &struct {
 			i int
 		}{}
 
 		for i := 0; i < tasksCount; i++ {
 			tasks = append(tasks, func() error {
+				mu.Lock()
 				executionState.i++
+				mu.Unlock()
 
 				// Some load
 				time.Sleep(time.Microsecond * time.Duration(rand.Intn(100)))
+				mu.Lock()
 				executionState.i--
+				mu.Unlock()
 				return nil
 			})
 		}
@@ -125,7 +131,10 @@ func TestRun(t *testing.T) {
 
 		require.Eventually(t, func() bool {
 			// the condition true only if tasks are processing in several go goroutines
-			return executionState.i > 1
+			mu.Lock()
+			result := executionState.i > 1
+			mu.Unlock()
+			return result
 		}, time.Second, time.Millisecond, "Status was not done")
 
 		wg.Wait()

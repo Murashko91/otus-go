@@ -15,6 +15,38 @@ func TestList(t *testing.T) {
 		require.Nil(t, l.Back())
 	})
 
+	t.Run("Remove item test", func(t *testing.T) {
+		l := NewList()
+
+		item1 := l.PushFront(10) // [10]
+		item2 := l.PushFront(20) // [10]
+		require.Equal(t, 2, l.Len())
+
+		l.Remove(item1)
+		require.Equal(t, 1, l.Len())
+		l.Remove(item2)
+		require.Equal(t, 0, l.Len())
+
+		// Test unexpected behavior - remove already removed item
+		l.Remove(item1)
+		require.Equal(t, 0, l.Len())
+	})
+
+	t.Run("Push back test", func(t *testing.T) {
+		l := NewList()
+
+		// Push back to empty list
+		item1 := l.PushBack(10) // [10]
+		item2 := l.PushBack(20)
+		item3 := l.PushBack(30) // [10]
+		require.Equal(t, 3, l.Len())
+
+		require.Equal(t, item1, l.Front())
+		require.Equal(t, item3, l.Back())
+		l.MoveToFront(item2)
+		require.Equal(t, item2, l.Front())
+	})
+
 	t.Run("complex", func(t *testing.T) {
 		l := NewList()
 

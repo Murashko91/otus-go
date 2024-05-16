@@ -19,13 +19,11 @@ type workContext struct {
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
-
 	wg := &sync.WaitGroup{}
 	wc := &workContext{tasks: tasks, mu: &sync.Mutex{}, wg: wg}
 	errorLimitEnabled := m > 0
 
 	for i := 0; i < n; i++ {
-
 		wg.Add(1)
 		go doWork(wc, m, errorLimitEnabled)
 	}
@@ -39,9 +37,7 @@ func Run(tasks []Task, n, m int) error {
 }
 
 func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
-
 	for {
-
 		wc.mu.Lock()
 
 		errLimit := wc.errorsNum >= maxErr
@@ -70,9 +66,7 @@ func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
 			wc.errorsNum++
 			wc.mu.Unlock()
 		}
-
 	}
 
 	wc.wg.Done()
-
 }

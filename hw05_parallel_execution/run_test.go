@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -66,5 +67,47 @@ func TestRun(t *testing.T) {
 
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
+	})
+
+	t.Run("tasks without errors *", func(t *testing.T) {
+		tasksCount := 50
+		tasks := make([]Task, 0, tasksCount)
+		workersCount := 5
+		maxErrorsCount := 1
+
+		var executionState = &struct {
+			i int
+		}{}
+
+		for i := 0; i < tasksCount; i++ {
+
+			tasks = append(tasks, func() error {
+				executionState.i++
+
+				// Some load
+				time.Sleep(time.Microsecond * time.Duration(rand.Intn(100)))
+				executionState.i--
+				return nil
+			})
+		}
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
+		var err error
+
+		go func() {
+			err = Run(tasks, workersCount, maxErrorsCount)
+			wg.Done()
+		}()
+
+		require.Eventually(t, func() bool {
+			// the condition true only if tasks are processing in several go goroutines
+			return executionState.i > 1
+		}, time.Second, time.Millisecond, "Status was not done")
+
+		wg.Wait()
+
+		require.NoError(t, err)
 	})
 }

@@ -39,17 +39,14 @@ func Run(tasks []Task, n, m int) error {
 func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
 	for {
 		wc.mu.Lock()
-
 		errLimit := wc.errorsNum >= maxErr
 
 		// Desable error limit validation for m <= 0
 		if !errorLimitEnabled {
 			errLimit = false
 		}
-
 		taskIndex := wc.tNumber
 		tasksCompleated := taskIndex > len(wc.tasks)-1
-
 		wc.tNumber++
 
 		if errLimit || tasksCompleated {
@@ -67,6 +64,5 @@ func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
 			wc.mu.Unlock()
 		}
 	}
-
 	wc.wg.Done()
 }

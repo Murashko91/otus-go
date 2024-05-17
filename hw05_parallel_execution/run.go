@@ -3,7 +3,6 @@ package hw05parallelexecution
 import (
 	"errors"
 	"sync"
-	"sync/atomic"
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
@@ -12,7 +11,7 @@ type Task func() error
 
 type workContext struct {
 	mu       *sync.Mutex
-	errCount int32
+	errCount int
 	wg       *sync.WaitGroup
 	ch       chan Task
 }
@@ -37,7 +36,7 @@ func Run(tasks []Task, n, m int) error {
 	}
 	wg.Wait()
 
-	if int(wc.errCount) >= m && errorLimitEnabled {
+	if wc.errCount >= m && errorLimitEnabled {
 		return ErrErrorsLimitExceeded
 	}
 
@@ -47,7 +46,7 @@ func Run(tasks []Task, n, m int) error {
 func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
 	for {
 		wc.mu.Lock()
-		isErrorLimitExceeded := int(wc.errCount) >= maxErr
+		isErrorLimitExceeded := wc.errCount >= maxErr
 		wc.mu.Unlock()
 
 		// Desable error limit validation for m <= 0
@@ -62,7 +61,9 @@ func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
 		if !isErrorLimitExceeded && task != nil {
 			err := task()
 			if err != nil {
-				atomic.AddInt32(&wc.errCount, 1)
+				wc.mu.Lock()
+				wc.errCount++
+				wc.mu.Unlock()
 			}
 		}
 

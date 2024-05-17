@@ -3,6 +3,7 @@ package hw05parallelexecution
 import (
 	"errors"
 	"sync"
+	"sync/atomic"
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
@@ -10,18 +11,25 @@ var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
 type Task func() error
 
 type workContext struct {
-	tasks     []Task
-	mu        *sync.Mutex
-	errCount  int
-	taskCount int
-	wg        *sync.WaitGroup
+	mu       *sync.Mutex
+	errCount int32
+	wg       *sync.WaitGroup
+	ch       chan Task
 }
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
+	ch := make(chan Task)
 	wg := &sync.WaitGroup{}
-	wc := &workContext{tasks: tasks, mu: &sync.Mutex{}, wg: wg}
+	wc := &workContext{mu: &sync.Mutex{}, wg: wg, ch: ch}
 	errorLimitEnabled := m > 0
+
+	go func() {
+		defer close(ch)
+		for _, t := range tasks {
+			ch <- t
+		}
+	}()
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
@@ -29,7 +37,7 @@ func Run(tasks []Task, n, m int) error {
 	}
 	wg.Wait()
 
-	if wc.errCount >= m && errorLimitEnabled {
+	if int(wc.errCount) >= m && errorLimitEnabled {
 		return ErrErrorsLimitExceeded
 	}
 
@@ -39,29 +47,27 @@ func Run(tasks []Task, n, m int) error {
 func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
 	for {
 		wc.mu.Lock()
-		errLimit := wc.errCount >= maxErr
+		isErrorLimitExceeded := int(wc.errCount) >= maxErr
+		wc.mu.Unlock()
 
 		// Desable error limit validation for m <= 0
 		if !errorLimitEnabled {
-			errLimit = false
+			isErrorLimitExceeded = false
 		}
-		taskIndex := wc.taskCount
-		tasksCompleated := taskIndex > len(wc.tasks)-1
-		wc.taskCount++
 
-		if errLimit || tasksCompleated {
-			wc.mu.Unlock()
-			break
-		}
-		wc.mu.Unlock()
+		chLen := len(wc.ch)
+		task, isOpen := <-wc.ch
 
 		// Execute task
-		err := wc.tasks[taskIndex]()
+		if !isErrorLimitExceeded && task != nil {
+			err := task()
+			if err != nil {
+				atomic.AddInt32(&wc.errCount, 1)
+			}
+		}
 
-		if err != nil && errorLimitEnabled {
-			wc.mu.Lock()
-			wc.errCount++
-			wc.mu.Unlock()
+		if chLen == 0 && !isOpen && task == nil {
+			break
 		}
 	}
 	wc.wg.Done()

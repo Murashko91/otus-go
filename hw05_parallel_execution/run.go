@@ -3,25 +3,18 @@ package hw05parallelexecution
 import (
 	"errors"
 	"sync"
+	"sync/atomic"
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
 
 type Task func() error
 
-type workContext struct {
-	mu       *sync.Mutex
-	errCount int
-	wg       *sync.WaitGroup
-	ch       chan Task
-}
-
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
 	ch := make(chan Task)
 	wg := &sync.WaitGroup{}
-	wc := &workContext{mu: &sync.Mutex{}, wg: wg, ch: ch}
-	errorLimitEnabled := m > 0
+	var errCount int32
 
 	go func() {
 		defer close(ch)
@@ -32,44 +25,39 @@ func Run(tasks []Task, n, m int) error {
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
-		go doWork(wc, m, errorLimitEnabled)
+		go doWork(ch, wg, m, &errCount)
 	}
 	wg.Wait()
 
-	if wc.errCount >= m && errorLimitEnabled {
+	if int(atomic.LoadInt32(&errCount)) >= m && m > 0 {
 		return ErrErrorsLimitExceeded
 	}
 
 	return nil
 }
 
-func doWork(wc *workContext, maxErr int, errorLimitEnabled bool) {
+func doWork(ch chan Task, wg *sync.WaitGroup, maxErr int, errCount *int32) {
 	for {
-		wc.mu.Lock()
-		isErrorLimitExceeded := wc.errCount >= maxErr
-		wc.mu.Unlock()
+		isErrorLimitExceeded := int(atomic.LoadInt32(errCount)) >= maxErr
 
 		// Desable error limit validation for m <= 0
-		if !errorLimitEnabled {
+		if maxErr <= 0 {
 			isErrorLimitExceeded = false
 		}
 
-		chLen := len(wc.ch)
-		task, isOpen := <-wc.ch
+		chLen := len(ch)
+		task, isOpen := <-ch
 
 		// Execute task
 		if !isErrorLimitExceeded && task != nil {
 			err := task()
 			if err != nil {
-				wc.mu.Lock()
-				wc.errCount++
-				wc.mu.Unlock()
+				atomic.AddInt32(errCount, 1)
 			}
 		}
-
 		if chLen == 0 && !isOpen && task == nil {
 			break
 		}
 	}
-	wc.wg.Done()
+	wg.Done()
 }

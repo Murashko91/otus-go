@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -38,6 +39,29 @@ func TestRun(t *testing.T) {
 		require.LessOrEqual(t, runTasksCount, int32(workersCount+maxErrorsCount), "extra tasks were started")
 	})
 
+	t.Run("if were errors but M is 0 - all tasks should be", func(t *testing.T) {
+		tasksCount := 50
+		tasks := make([]Task, 0, tasksCount)
+
+		var runTasksCount int32
+
+		for i := 0; i < tasksCount; i++ {
+			err := fmt.Errorf("error from task %d", i)
+			tasks = append(tasks, func() error {
+				time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))
+				atomic.AddInt32(&runTasksCount, 1)
+				return err
+			})
+		}
+
+		workersCount := 10
+		maxErrorsCount := 0
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.NoError(t, err)
+		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were started")
+	})
+
 	t.Run("tasks without errors", func(t *testing.T) {
 		tasksCount := 50
 		tasks := make([]Task, 0, tasksCount)
@@ -66,5 +90,55 @@ func TestRun(t *testing.T) {
 
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
+	})
+
+	t.Run("tasks without errors *", func(t *testing.T) {
+		tasksCount := 50
+		tasks := make([]Task, 0, tasksCount)
+		workersCount := 5
+		maxErrorsCount := 1
+
+		mu := &sync.Mutex{}
+
+		executionState := &struct {
+			i int
+		}{}
+
+		for i := 0; i < tasksCount; i++ {
+			tasks = append(tasks, func() error {
+				mu.Lock()
+				executionState.i++
+				mu.Unlock()
+
+				// Some load
+				time.Sleep(time.Microsecond * time.Duration(rand.Intn(100)))
+				mu.Lock()
+				executionState.i--
+				mu.Unlock()
+				return nil
+			})
+		}
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
+		var err error
+
+		go func() {
+			err = Run(tasks, workersCount, maxErrorsCount)
+			wg.Done()
+		}()
+
+		require.Eventually(t, func() bool {
+			// the condition true only if tasks are processing in several go goroutines
+			mu.Lock()
+			result := executionState.i > 1
+			mu.Unlock()
+			return result
+		}, time.Second, time.Millisecond, "Status was not done")
+
+		wg.Wait()
+
+		require.NoError(t, err)
 	})
 }

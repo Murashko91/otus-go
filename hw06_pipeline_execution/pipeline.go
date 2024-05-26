@@ -9,7 +9,6 @@ type (
 type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-
 	stage := stages[0]
 	result := make(Bi)
 
@@ -35,5 +34,4 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 		return stage(in)
 	}
 	return result
-
 }

@@ -144,7 +144,6 @@ func TestValidate(t *testing.T) {
 			if validateResult == nil {
 				require.Equal(t, validateResult, tt.expectedErr)
 			} else {
-
 				var valErr ValidationErrors
 				if errors.As(validateResult, &valErr) {
 					require.Equal(t, errors.Unwrap(validateResult), tt.expectedErr)

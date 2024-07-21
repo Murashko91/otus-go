@@ -14,7 +14,7 @@ type User struct {
 	ID       int    `json:"-"`
 	Name     string `json:"-"`
 	Username string `json:"-"`
-	Email    string `json:"Email"`
+	Email    string `json:"email"`
 	Phone    string `json:"-"`
 	Password string `json:"-"`
 	Address  string `json:"-"`
@@ -30,18 +30,34 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	return countDomains(u, domain)
 }
 
-type users []User
+type users [100_000]User
 
-func getUsers(r io.Reader) (result users, err error) {
+func getUsers(r io.Reader) (users, error) {
+	result := users{}
 
-	scanner := bufio.NewScanner(r)
-
-	for scanner.Scan() {
-		user := User{}
-		if err = easyjson.Unmarshal([]byte(scanner.Text()), &user); err != nil {
-			return nil, err
+	// 1. Replaced ReadAll with  bufio.NewReader
+	scanner := bufio.NewReader(r)
+	i := 0
+	for {
+		line, isPrefix, readErr := scanner.ReadLine()
+		if isPrefix {
+			break
 		}
-		result = append(result, user)
+		if readErr != nil {
+			if readErr == io.EOF {
+				break
+			}
+			return users{}, readErr
+		}
+
+		user := User{}
+
+		// 2. Updated Unmarshal to easyjson
+		if err := easyjson.Unmarshal((line), &user); err != nil {
+			return users{}, err
+		}
+		result[i] = user
+		i++
 	}
 
 	return result, nil
@@ -51,11 +67,12 @@ func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
 	for _, user := range u {
+		// 3. Updated Regexp  to strings.Contains
 		if strings.Contains(user.Email, "."+domain) {
-			subDomain := strings.ToLower(user.Email[strings.Index(user.Email, "@")+1:])
-			num := result[subDomain]
+			fullDomain := strings.ToLower(user.Email[strings.Index(user.Email, "@")+1:])
+			num := result[fullDomain]
 			num++
-			result[subDomain] = num
+			result[fullDomain] = num
 		}
 	}
 	return result, nil

@@ -25,7 +25,6 @@ func BenchmarkGetDomainStat(b *testing.B) {
 	defer r.Close()
 
 	for i := 0; i < b.N; i++ {
-
 		_, err := GetDomainStat(data, "biz")
 		if err != nil {
 			fmt.Println(err.Error())

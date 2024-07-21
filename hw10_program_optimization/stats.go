@@ -35,7 +35,7 @@ type users [100_000]User
 func getUsers(r io.Reader) (users, error) {
 	result := users{}
 
-	// 1. Replaced ReadAll with  bufio.NewReader
+	// 2. Replaced ReadAll with  bufio.NewReader(benchmark_results/benchstat_2.txt)
 	scanner := bufio.NewReader(r)
 	i := 0
 	for {
@@ -52,7 +52,7 @@ func getUsers(r io.Reader) (users, error) {
 
 		user := User{}
 
-		// 2. Updated Unmarshal to easyjson
+		// 3. Updated Unmarshal to easyjson (benchmark_results/benchstat_3.txt)
 		if err := easyjson.Unmarshal((line), &user); err != nil {
 			return users{}, err
 		}
@@ -67,7 +67,7 @@ func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
 	for _, user := range u {
-		// 3. Updated Regexp  to strings.Contains
+		// 1. Updated Regexp  to strings.Contains (benchmark_results/benchstat_1.txt)
 		if strings.Contains(user.Email, "."+domain) {
 			fullDomain := strings.ToLower(user.Email[strings.Index(user.Email, "@")+1:])
 			num := result[fullDomain]

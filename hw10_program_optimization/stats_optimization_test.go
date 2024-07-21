@@ -5,7 +5,6 @@ package hw10programoptimization
 
 import (
 	"archive/zip"
-	"fmt"
 	"testing"
 	"time"
 
@@ -18,19 +17,6 @@ const (
 
 	timeLimit = 300 * time.Millisecond
 )
-
-func BenchmarkGetDomainStat(b *testing.B) {
-	r, _ := zip.OpenReader("testdata/users.dat.zip")
-	data, _ := r.File[0].Open()
-	defer r.Close()
-
-	for i := 0; i < b.N; i++ {
-		_, err := GetDomainStat(data, "biz")
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	}
-}
 
 // go test -v -count=1 -timeout=30s -tags bench .
 func TestGetDomainStat_Time_And_Memory(t *testing.T) {

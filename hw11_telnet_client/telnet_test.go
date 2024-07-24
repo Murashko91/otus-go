@@ -18,7 +18,6 @@ func TestTelnetClient(t *testing.T) {
 		defer func() { require.NoError(t, l.Close()) }()
 
 		var wg sync.WaitGroup
-
 		wg.Add(2)
 
 		go func() {

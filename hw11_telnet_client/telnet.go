@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"io"
 	"net"
 	"time"
@@ -20,20 +19,15 @@ type TelnetClientImpl struct {
 	timeout time.Duration
 	in      io.ReadCloser
 	out     io.Writer
-	Ctx     context.Context
-	cancel  context.CancelFunc
 }
 
 func (t *TelnetClientImpl) Connect() error {
 	var err error
-	dialer := &net.Dialer{}
-	t.Ctx, t.cancel = context.WithTimeout(context.Background(), t.timeout)
-	t.conn, err = dialer.DialContext(t.Ctx, "tcp", t.address)
+	t.conn, err = net.Dial("tcp", t.address)
 	return err
 }
 
 func (t *TelnetClientImpl) Close() error {
-	t.cancel()
 	return t.conn.Close()
 }
 
@@ -55,6 +49,3 @@ func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, ou
 		out:     out,
 	})
 }
-
-// Place your code here.
-// P.S. Author's solution takes no more than 50 lines.

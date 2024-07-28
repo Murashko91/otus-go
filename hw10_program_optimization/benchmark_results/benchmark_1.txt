@@ -1,0 +1,7 @@
+goos: linux
+goarch: amd64
+pkg: github.com/murashko91/otus-go/hw10_program_optimization
+cpu: Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz
+BenchmarkGetDomainStat-4   	     139	   7989334 ns/op	  127000 B/op	     411 allocs/op
+PASS
+ok  	github.com/murashko91/otus-go/hw10_program_optimization	1.595s

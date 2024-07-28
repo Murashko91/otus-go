@@ -31,10 +31,11 @@ func main() {
 	client := NewTelnetClient(fmt.Sprintf("%s:%s", host, port), timeout, os.Stdin, os.Stdout)
 	err = client.Connect()
 	if err != nil {
-		fmt.Println("Connection error")
-		fmt.Println(err)
+		fmt.Printf("Connection error: %v", err)
 		return
 	}
+	defer client.Close()
+
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
@@ -42,13 +43,11 @@ func main() {
 	go listenFromClient(client, wg)
 	go sendToClient(client, wg)
 	go forceTimeout(timeout, wg)
-
 	wg.Wait()
-	// Place your code here,
-	// P.S. Do not rush to throw context down, think think if it is useful with blocking operation?
 }
 
 func listenSignals(client TelnetClient, wg *sync.WaitGroup) {
+	defer wg.Done()
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, syscall.SIGINT)
 
@@ -57,24 +56,23 @@ func listenSignals(client TelnetClient, wg *sync.WaitGroup) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	wg.Done()
 }
 
 func listenFromClient(client TelnetClient, wg *sync.WaitGroup) {
+	defer wg.Done()
 	err := client.Receive()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	wg.Done()
 }
 
 func sendToClient(client TelnetClient, wg *sync.WaitGroup) {
+	defer wg.Done()
 	err := client.Send()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	client.Close()
-	wg.Done()
 }
 
 func forceTimeout(timeout time.Duration, wg *sync.WaitGroup) {

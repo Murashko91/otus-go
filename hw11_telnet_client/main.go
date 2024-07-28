@@ -62,7 +62,7 @@ func listenFromClient(client TelnetClient, wg *sync.WaitGroup) {
 	defer wg.Done()
 	err := client.Receive()
 	if err != nil {
-		fmt.Println(err.Error())
+		client.Close()
 	}
 }
 

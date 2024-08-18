@@ -10,13 +10,20 @@ import (
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
-	Logger LoggerConf `yaml:"logger"`
-	// TODO
+	Logger   LoggerConf `yaml:"logger"`
+	Database DBConfig   `yaml:"db"`
 }
 
 type LoggerConf struct {
 	Level string `yaml:"level"`
-	// TODO
+}
+
+type DBConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DBName   string `yaml:"db_name"`
 }
 
 func NewConfig(configFilePath string) Config {

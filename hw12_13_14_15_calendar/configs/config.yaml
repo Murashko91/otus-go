@@ -1,2 +1,8 @@
 logger:
   level: "INFO"
+db:
+  host: "localhost"
+  port: "5432"
+  user: "postgres"
+  password: "postgres"
+  db_name: "calendar"

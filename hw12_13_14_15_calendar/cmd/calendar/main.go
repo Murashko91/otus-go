@@ -11,7 +11,7 @@ import (
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -29,9 +29,18 @@ func main() {
 	}
 
 	config := NewConfig(configFile)
+
 	logg := logger.New(config.Logger.Level)
 
-	storage := memorystorage.New()
+	//storage := memorystorage.New()
+
+	storage := sqlstorage.New(sqlstorage.StorageInfo{
+		Host:     config.Database.Host,
+		Port:     config.Database.Port,
+		User:     config.Database.User,
+		Password: config.Database.Password,
+		DBName:   config.Database.Password},
+	)
 	calendar := app.New(logg, storage)
 
 	server := internalhttp.NewServer(logg, calendar)

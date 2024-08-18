@@ -2,18 +2,17 @@ package internalhttp
 
 import (
 	"context"
+
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 )
 
 type Server struct { // TODO
 }
 
-type Logger interface { // TODO
-}
-
 type Application interface { // TODO
 }
 
-func NewServer(logger Logger, app Application) *Server {
+func NewServer(logger app.Logger, app Application) *Server {
 	return &Server{}
 }
 

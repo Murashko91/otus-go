@@ -213,5 +213,3 @@ func getUserId(ctx context.Context, operationName string) (int, error) {
 	}
 	return userId, nil
 }
-
-// TODO

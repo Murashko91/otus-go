@@ -24,6 +24,7 @@ type DBConfig struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	DBName   string `yaml:"db_name"`
+	InMemory bool   `yaml:"in_memory"`
 }
 
 func NewConfig(configFilePath string) Config {

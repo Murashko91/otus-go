@@ -80,7 +80,9 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage
 	if event.UserId != userId {
 		return event, fmt.Errorf("mismatch user id for update event: %d and %d", userId, event.UserId)
 	}
+	s.mu.Lock()
 	userDb.events[event.Id] = event
+	s.mu.Unlock()
 
 	return event, nil
 
@@ -177,6 +179,10 @@ func (s *Storage) UpdateUser(ctx context.Context, user storage.User) (storage.Us
 		return user, err
 	}
 
+	userDb := s.db.userMap[userId]
+	userDb.User = user
+
+	s.db.userMap[userId] = userDb
 	return s.db.userMap[userId].User, nil
 
 }

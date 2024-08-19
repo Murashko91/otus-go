@@ -22,18 +22,42 @@ type Logger interface {
 type Storage interface {
 	Connect() error
 	Close() error
-	CreateEvent(storage.Event) (storage.Event, error)
-	UpdateEvent(string, storage.Event) (storage.Event, error)
-	DeleteEvent(string) (storage.Event, error)
-	GetDailyEvents(time.Time) ([]storage.Event, error)
-	GetWeeklyEvents(time.Time) ([]storage.Event, error)
-	GetMonthlyEvents(time.Time) ([]storage.Event, error)
+	CreateEvent(context.Context, storage.Event) (storage.Event, error)
+	UpdateEvent(context.Context, storage.Event) (storage.Event, error)
+	DeleteEvent(context.Context, int) error
+	GetDailyEvents(context.Context, time.Time) ([]storage.Event, error)
+	GetWeeklyEvents(context.Context, time.Time) ([]storage.Event, error)
+	GetMonthlyEvents(context.Context, time.Time) ([]storage.Event, error)
+	CreateUser(context.Context, storage.User) (storage.User, error)
+	GetUser(context.Context) (storage.User, error)
+	UpdateUser(context.Context, storage.User) (storage.User, error)
+	DeleteUser(context.Context) error
 }
 
 func New(logger Logger, storage Storage) *App {
 	return &App{Logger: logger, storage: storage}
 }
 
-func (a *App) CreateEvent(ctx context.Context, id, title string) (storage.Event, error) {
-	return a.storage.CreateEvent(storage.Event{Id: id, Title: title})
+func (a *App) CreateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
+	return a.storage.CreateEvent(ctx, event)
+}
+
+func (a *App) UpdateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
+	return a.storage.UpdateEvent(ctx, event)
+}
+
+func (a *App) DeleteEvent(ctx context.Context, id int) error {
+	return a.storage.DeleteEvent(ctx, id)
+}
+
+func (a *App) GetDailyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	return a.storage.GetDailyEvents(ctx, date)
+}
+
+func (a *App) GetWeeklyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	return a.storage.GetWeeklyEvents(ctx, date)
+}
+
+func (a *App) GetMonthlyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	return a.storage.GetMonthlyEvents(ctx, date)
 }

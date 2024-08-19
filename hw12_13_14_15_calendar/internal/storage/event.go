@@ -12,7 +12,7 @@ type Event struct {
 }
 
 type User struct {
-	Id         int64
+	Id         int
 	Name       string
 	SecondName time.Time
 	Email      string

@@ -52,6 +52,7 @@ func NewServer(logger app.Logger, app Application, conf ServerConf) *Server {
 
 func (s *Server) Start(ctx context.Context) error {
 	err := s.server.ListenAndServe()
+	ctx.Done()
 	return err
 }
 

@@ -2,7 +2,8 @@ package internalhttp
 
 import "net/http"
 
-func helloHandler(r http.ResponseWriter, w *http.Request) {
-	r.WriteHeader(http.StatusOK)
-	r.Write([]byte("hello world"))
+func helloHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("hello world\n"))
+	w.Write([]byte(r.RemoteAddr))
 }

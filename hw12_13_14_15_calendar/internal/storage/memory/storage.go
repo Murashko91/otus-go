@@ -140,7 +140,7 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 	return result, nil
 }
 
-func (s *Storage) CreateUser(ctx context.Context, user storage.User) (storage.User, error) {
+func (s *Storage) CreateUser(_ context.Context, user storage.User) (storage.User, error) {
 	userID := int(atomic.AddInt32(&newUserID, 1))
 	user.ID = userID
 

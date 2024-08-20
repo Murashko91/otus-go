@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 )
@@ -25,12 +24,10 @@ type StorageInfo struct {
 }
 
 func New(psqlInfo StorageInfo) *Storage {
-
 	return &Storage{info: psqlInfo}
 }
 
 func (s *Storage) Connect() error {
-
 	db, err := sqlx.Open("pgx", getPsqlString(s.info))
 	if err != nil {
 		return err
@@ -45,9 +42,7 @@ func (s *Storage) Close() error {
 }
 
 func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
-
-	_, err := getUserIdWithCheck(ctx, event.UserId, "UpdateEvent")
-	if err != nil {
+	if err := checkUserID(ctx, event.ID, "CreateEvent"); err != nil {
 		return event, err
 	}
 
@@ -55,14 +50,14 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage
 		 	VALUES($1, $2, $3, $4, $5) 
 			RETURNING id`
 	sqlValues := []interface{}{
-		event.UserId,
+		event.UserID,
 		event.Title,
 		event.Descr,
 		event.StartDate,
 		event.EndDate,
 	}
 
-	lastInsertId := 0
+	lastInsertID := 0
 
 	row := s.db.QueryRowContext(ctx, sql, sqlValues...)
 
@@ -70,16 +65,14 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage
 		return event, row.Err()
 	}
 
-	row.Scan(&lastInsertId)
-	event.Id = lastInsertId
+	row.Scan(&lastInsertID)
+	event.ID = lastInsertID
 
 	return event, nil
 }
 
 func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
-
-	_, err := getUserIdWithCheck(ctx, event.Id, "UpdateEvent")
-	if err != nil {
+	if err := checkUserID(ctx, event.ID, "UpdateEvent"); err != nil {
 		return event, err
 	}
 
@@ -87,15 +80,13 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage
 			title = :title, descr = :descr, start_date= :startdate, end_date = :enddate
  			where id =:id and user_id = :userid;`
 
-	_, err = s.db.NamedExecContext(ctx, sql, event)
+	_, err := s.db.NamedExecContext(ctx, sql, event)
 
 	return event, err
-
 }
 
 func (s *Storage) DeleteEvent(ctx context.Context, id int) error {
-
-	userId, err := getUserId(ctx, "getEvents")
+	userID, err := getUserID(ctx, "getEvents")
 	if err != nil {
 		return err
 	}
@@ -103,13 +94,12 @@ func (s *Storage) DeleteEvent(ctx context.Context, id int) error {
 	sql := `delete events 
 				where id = :$1 and user_id = :$2;`
 
-	_, err = s.db.ExecContext(ctx, sql, id, userId)
+	_, err = s.db.ExecContext(ctx, sql, id, userID)
 
 	return err
 }
 
 func (s *Storage) GetDailyEvents(ctx context.Context, startDate time.Time) ([]storage.Event, error) {
-
 	endDate := startDate.Add(time.Hour * 24)
 
 	return s.getEvents(ctx, startDate, endDate)
@@ -128,8 +118,7 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, startDate time.Time) ([]s
 }
 
 func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate time.Time) ([]storage.Event, error) {
-
-	userId, err := getUserId(ctx, "getEvents")
+	userID, err := getUserID(ctx, "getEvents")
 	if err != nil {
 		return []storage.Event{}, err
 	}
@@ -138,8 +127,7 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 	FROM events 
 	WHERE start_date > $1 AND  end_date < $2 and user_id = :$3`
 
-	rows, err := s.db.QueryxContext(ctx, sql, startDate, endDate, userId)
-
+	rows, err := s.db.QueryxContext(ctx, sql, startDate, endDate, userID)
 	if err != nil {
 		return []storage.Event{}, err
 	}
@@ -162,7 +150,6 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 }
 
 func (s *Storage) CreateUser(ctx context.Context, user storage.User) (storage.User, error) {
-
 	sql := `INSERT INTO user(name, email)
 		 	VALUES($1, $2) 
 			RETURNING id`
@@ -171,7 +158,7 @@ func (s *Storage) CreateUser(ctx context.Context, user storage.User) (storage.Us
 		user.Email,
 	}
 
-	lastInsertId := 0
+	lastInsertID := 0
 
 	row := s.db.QueryRowContext(ctx, sql, sqlValues...)
 
@@ -179,26 +166,24 @@ func (s *Storage) CreateUser(ctx context.Context, user storage.User) (storage.Us
 		return user, row.Err()
 	}
 
-	err := row.Scan(&lastInsertId)
-	user.Id = lastInsertId
+	err := row.Scan(&lastInsertID)
+	user.ID = lastInsertID
 
 	return user, err
-
 }
 
 func (s *Storage) GetUser(ctx context.Context) (storage.User, error) {
-
 	sql := `SELECT id, name, email 
 	FROM users 
 	WHERE id = :$1`
 
-	userId, err := getUserId(ctx, "GetUser")
+	userID, err := getUserID(ctx, "GetUser")
 	if err != nil {
 		return storage.User{}, err
 	}
 
 	var resultUser storage.User
-	row := s.db.QueryRowContext(ctx, sql, userId)
+	row := s.db.QueryRowContext(ctx, sql, userID)
 
 	if row.Err() != nil {
 		return storage.User{}, row.Err()
@@ -210,7 +195,6 @@ func (s *Storage) GetUser(ctx context.Context) (storage.User, error) {
 }
 
 func (s *Storage) UpdateUser(ctx context.Context, user storage.User) (storage.User, error) {
-
 	sql := `UPDATE users SET 
 			name = :name, email = :email
  			where id =:id;`
@@ -221,7 +205,6 @@ func (s *Storage) UpdateUser(ctx context.Context, user storage.User) (storage.Us
 }
 
 func (s *Storage) DeleteUser(ctx context.Context) error {
-
 	id, ok := ctx.Value("user_id").(int)
 	if !ok {
 		return fmt.Errorf("delete user err: user id is missed in ctx: %v", ctx.Value("user_id"))
@@ -238,7 +221,6 @@ func (s *Storage) DeleteUser(ctx context.Context) error {
 func getPsqlString(dbConfig StorageInfo) string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.DBName)
-
 }
 
 func getSelectEventsError(errorsStr []string) error {
@@ -247,27 +229,24 @@ func getSelectEventsError(errorsStr []string) error {
 	}
 
 	return fmt.Errorf("get events error: , %v", strings.Join(errorsStr, ";"))
-
 }
 
-func getUserIdWithCheck(ctx context.Context, id int, operationName string) (int, error) {
-
-	userId, err := getUserId(ctx, operationName)
+func checkUserID(ctx context.Context, id int, operationName string) error {
+	userID, err := getUserID(ctx, operationName)
 	if err != nil {
-		return userId, err
+		return err
 	}
 
-	if id != userId {
-		return userId, fmt.Errorf("mismatch user id for %s: %d and %d", operationName, userId, id)
+	if id != userID {
+		return fmt.Errorf("mismatch user id for %s: %d and %d", operationName, userID, id)
 	}
-	return userId, nil
+	return err
 }
 
-func getUserId(ctx context.Context, operationName string) (int, error) {
-
-	userId, ok := ctx.Value("user_id").(int)
+func getUserID(ctx context.Context, operationName string) (int, error) {
+	userID, ok := ctx.Value("user_id").(int)
 	if !ok {
-		return userId, fmt.Errorf("user id is missed in ctx for %s: %v", operationName, ctx.Value("user_id"))
+		return userID, fmt.Errorf("user id is missed in ctx for %s: %v", operationName, ctx.Value("user_id"))
 	}
-	return userId, nil
+	return userID, nil
 }

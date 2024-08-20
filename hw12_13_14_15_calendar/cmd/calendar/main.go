@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/server/http"
@@ -28,13 +29,9 @@ func main() {
 	}
 
 	config := NewConfig(configFile)
-
 	logg := logger.New(config.Logger.Level)
-
 	storage := getStorage(config.Database)
-
 	calendar := app.New(logg, storage)
-
 	server := internalhttp.NewServer(logg, calendar, internalhttp.ServerConf{
 		Host: config.Server.Host,
 		Port: config.Server.Port,

@@ -24,8 +24,8 @@ type DBConfig struct {
 	Port     int    `yaml:"port"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
-	DBName   string `yaml:"db_name"`
-	InMemory bool   `yaml:"in_memory"`
+	DBName   string `yaml:"dbName"`
+	InMemory bool   `yaml:"inMemory"`
 }
 
 type Server struct {

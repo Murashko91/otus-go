@@ -65,13 +65,15 @@ func (a *App) GetMonthlyEvents(ctx context.Context, date time.Time) ([]storage.E
 func (a *App) CreateUser(ctx context.Context, user storage.User) (storage.User, error) {
 	return a.storage.CreateUser(ctx, user)
 }
+
 func (a *App) GetUser(ctx context.Context) (storage.User, error) {
 	return a.storage.GetUser(ctx)
 }
+
 func (a *App) UpdateUser(ctx context.Context, user storage.User) (storage.User, error) {
 	return a.storage.UpdateUser(ctx, user)
 }
+
 func (a *App) DeleteUser(ctx context.Context) error {
 	return a.storage.DeleteUser(ctx)
-
 }

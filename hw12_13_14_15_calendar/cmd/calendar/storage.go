@@ -7,7 +7,6 @@ import (
 )
 
 func getStorage(config DBConfig) app.Storage {
-
 	if config.InMemory {
 		return memorystorage.New()
 	}
@@ -17,6 +16,6 @@ func getStorage(config DBConfig) app.Storage {
 		Port:     config.Port,
 		User:     config.User,
 		Password: config.Password,
-		DBName:   config.Password})
-
+		DBName:   config.Password,
+	})
 }

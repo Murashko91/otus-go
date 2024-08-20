@@ -23,6 +23,7 @@ type ErrMissedReqiredData struct {
 func (e ErrMissedReqiredData) Error() string {
 	return fmt.Sprintf("missed reqired fields: %v", e.fields)
 }
+
 func NewErrMissedReqiredData(fields []string) ErrMissedReqiredData {
 	return ErrMissedReqiredData{fields: fields}
 }

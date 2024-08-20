@@ -14,7 +14,6 @@ type Server struct {
 	server *http.Server
 	app    Application
 	logger app.Logger
-	conf   ServerConf
 }
 
 type ServerConf struct {
@@ -36,20 +35,23 @@ type Application interface {
 }
 
 func NewServer(logger app.Logger, app Application, conf ServerConf) *Server {
-	server := &http.Server{}
+	calendarRouter := http.NewServeMux()
+
+	calendarRouter.HandleFunc("/hello", loggingMiddleware(helloHandler, logger))
+	httpServer := &http.Server{
+		ReadHeaderTimeout: 3 * time.Second,
+		Addr:              fmt.Sprintf("%s:%d", conf.Host, conf.Port),
+		Handler:           calendarRouter,
+	}
 	return &Server{
-		server: server,
+		server: httpServer,
 		app:    app,
 		logger: logger,
-		conf:   conf,
 	}
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	calendarRouter := http.NewServeMux()
-
-	calendarRouter.HandleFunc("/hello", loggingMiddleware(helloHandler, s.logger))
-	err := http.ListenAndServe(fmt.Sprintf("%s:%d", s.conf.Host, s.conf.Port), calendarRouter)
+	err := s.server.ListenAndServe()
 	return err
 }
 

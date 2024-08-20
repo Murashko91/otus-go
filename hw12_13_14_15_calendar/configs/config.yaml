@@ -5,8 +5,8 @@ db:
   port: 5432
   user: "postgres"
   password: "postgres"
-  db_name: "calendar"
-  in_memory: true
+  dbName: "calendar"
+  inMemory: true
 server:
   host: "localhost"
   port: 7777

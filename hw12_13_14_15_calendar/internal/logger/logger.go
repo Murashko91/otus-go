@@ -39,7 +39,6 @@ func (l Logger) Warn(msg ...any) {
 
 func (l Logger) Error(msg ...any) {
 	l.log(logLevelsMap["error"], msg...)
-
 }
 
 func (l Logger) log(logerLevel int, msg ...any) {

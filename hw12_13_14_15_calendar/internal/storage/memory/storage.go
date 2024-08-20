@@ -181,8 +181,9 @@ func (s *Storage) UpdateUser(ctx context.Context, user storage.User) (storage.Us
 
 	userDb := s.db.userMap[userId]
 	userDb.User = user
-
+	s.mu.Lock()
 	s.db.userMap[userId] = userDb
+	s.mu.Unlock()
 	return s.db.userMap[userId].User, nil
 
 }

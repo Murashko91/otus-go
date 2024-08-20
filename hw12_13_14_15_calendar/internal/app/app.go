@@ -13,10 +13,10 @@ type App struct {
 }
 
 type Logger interface {
-	Debug(msg string)
-	Info(msg string)
-	Warn(msg string)
-	Error(msg string)
+	Debug(msg ...any)
+	Info(msg ...any)
+	Warn(msg ...any)
+	Error(msg ...any)
 }
 
 type Storage interface {
@@ -60,4 +60,18 @@ func (a *App) GetWeeklyEvents(ctx context.Context, date time.Time) ([]storage.Ev
 
 func (a *App) GetMonthlyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
 	return a.storage.GetMonthlyEvents(ctx, date)
+}
+
+func (a *App) CreateUser(ctx context.Context, user storage.User) (storage.User, error) {
+	return a.storage.CreateUser(ctx, user)
+}
+func (a *App) GetUser(ctx context.Context) (storage.User, error) {
+	return a.storage.GetUser(ctx)
+}
+func (a *App) UpdateUser(ctx context.Context, user storage.User) (storage.User, error) {
+	return a.storage.UpdateUser(ctx, user)
+}
+func (a *App) DeleteUser(ctx context.Context) error {
+	return a.storage.DeleteUser(ctx)
+
 }

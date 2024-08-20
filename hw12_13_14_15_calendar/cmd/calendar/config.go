@@ -12,6 +12,7 @@ import (
 type Config struct {
 	Logger   LoggerConf `yaml:"logger"`
 	Database DBConfig   `yaml:"db"`
+	Server   Server     `yaml:"server"`
 }
 
 type LoggerConf struct {
@@ -25,6 +26,11 @@ type DBConfig struct {
 	Password string `yaml:"password"`
 	DBName   string `yaml:"db_name"`
 	InMemory bool   `yaml:"in_memory"`
+}
+
+type Server struct {
+	Host string `yaml:"host"`
+	Port int    `yaml:"port"`
 }
 
 func NewConfig(configFilePath string) Config {

@@ -7,3 +7,6 @@ db:
   password: "postgres"
   db_name: "calendar"
   in_memory: true
+server:
+  host: "localhost"
+  port: 7777

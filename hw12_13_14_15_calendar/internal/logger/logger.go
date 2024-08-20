@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"log"
 )
 
 var logLevelsMap = map[string]int{
@@ -24,26 +25,25 @@ func New(level string) *Logger {
 	return &Logger{level: logLevel}
 }
 
-func (l Logger) Debug(msg string) {
-	l.log(msg, logLevelsMap["debug"])
+func (l Logger) Debug(msg ...any) {
+	l.log(logLevelsMap["debug"], msg...)
 }
 
-func (l Logger) Info(msg string) {
-	l.log(msg, logLevelsMap["info"])
+func (l Logger) Info(msg ...any) {
+	l.log(logLevelsMap["info"], msg...)
 }
 
-func (l Logger) Warn(msg string) {
-	l.log(msg, logLevelsMap["warn"])
+func (l Logger) Warn(msg ...any) {
+	l.log(logLevelsMap["warn"], msg...)
+}
+
+func (l Logger) Error(msg ...any) {
+	l.log(logLevelsMap["error"], msg...)
 
 }
 
-func (l Logger) Error(msg string) {
-	l.log(msg, logLevelsMap["error"])
-
-}
-
-func (l Logger) log(msg string, logerLevel int) {
+func (l Logger) log(logerLevel int, msg ...any) {
 	if l.level >= logerLevel {
-		fmt.Println(msg)
+		log.Println(msg...)
 	}
 }

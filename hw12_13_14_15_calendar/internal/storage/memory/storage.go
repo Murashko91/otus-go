@@ -25,11 +25,12 @@ type Storage struct {
 }
 
 func New() *Storage {
-	return &Storage{}
+	return &Storage{
+		db: memoryDB{},
+	}
 }
 
 func (s *Storage) Connect() error {
-	s.db = memoryDB{}
 	return nil
 }
 
@@ -37,6 +38,8 @@ func (s *Storage) Close() error {
 	s.db = memoryDB{}
 	return nil
 }
+
+type key string
 
 func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
 	userID, err := getUserIDWithCheck(ctx, event.UserID, "CreateEvent")
@@ -196,7 +199,7 @@ func getUserIDWithCheck(ctx context.Context, id int, operationName string) (int,
 }
 
 func getUserID(ctx context.Context, operationName string) (int, error) {
-	userID, ok := ctx.Value("user_id").(int)
+	userID, ok := ctx.Value(key("user_id")).(int)
 	if !ok {
 		return userID, fmt.Errorf("user id is missed in ctx for %s: %v", operationName, ctx.Value("user_id"))
 	}

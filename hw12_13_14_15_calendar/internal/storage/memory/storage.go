@@ -10,17 +10,17 @@ import (
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 )
 
-type memoryDB struct {
-	userMap map[int]userDB
-}
+var (
+	newUserID  int32
+	newEventID int32
+)
 
-type userDB struct {
-	storage.User
-	events map[int]storage.Event
+type memoryDB struct {
+	userMap   sync.Map
+	eventsMap sync.Map
 }
 
 type Storage struct {
-	mu *sync.RWMutex
 	db memoryDB
 }
 
@@ -29,8 +29,7 @@ func New() *Storage {
 }
 
 func (s *Storage) Connect() error {
-	s.db = memoryDB{userMap: make(map[int]userDB)}
-	s.mu = &sync.RWMutex{}
+	s.db = memoryDB{}
 	return nil
 }
 
@@ -39,25 +38,20 @@ func (s *Storage) Close() error {
 	return nil
 }
 
-var (
-	newUserID  int32
-	newEventID int32
-)
-
 func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
-	userID, err := getUserIDWithCheck(ctx, event.UserID, "UpdateEvent")
+	userID, err := getUserIDWithCheck(ctx, event.UserID, "CreateEvent")
 	if err != nil {
 		return event, err
 	}
-	userDB, exists := s.db.userMap[userID]
+	_, exists := s.db.userMap.Load(userID)
 
 	if !exists {
 		return event, fmt.Errorf("create event error: user id is missed in db: %d", userID)
 	}
-
 	eventID := int(atomic.AddInt32(&newEventID, 1))
-	userDB.events[eventID] = event
 	event.ID = eventID
+	userEventKey := getUserEventKey(userID, eventID)
+	s.db.eventsMap.Store(userEventKey, event)
 
 	return event, nil
 }
@@ -68,7 +62,7 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage
 		return event, err
 	}
 
-	userDB, exists := s.db.userMap[userID]
+	_, exists := s.db.userMap.Load(userID)
 
 	if !exists {
 		return event, fmt.Errorf("update event error: user id is missed in db: %d", userID)
@@ -77,9 +71,9 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage
 	if event.UserID != userID {
 		return event, fmt.Errorf("mismatch user id for update event: %d and %d", userID, event.UserID)
 	}
-	s.mu.Lock()
-	userDB.events[event.ID] = event
-	s.mu.Unlock()
+
+	userEventKey := getUserEventKey(userID, event.ID)
+	s.db.eventsMap.Store(userEventKey, event)
 
 	return event, nil
 }
@@ -89,13 +83,14 @@ func (s *Storage) DeleteEvent(ctx context.Context, id int) error {
 	if err != nil {
 		return err
 	}
-	userDB, exists := s.db.userMap[userID]
+	_, exists := s.db.userMap.Load(userID)
 
 	if !exists {
 		return fmt.Errorf("user id is missed in db: %d", userID)
 	}
 
-	delete(userDB.events, id)
+	userEventKey := getUserEventKey(userID, id)
+	s.db.eventsMap.Delete(userEventKey)
 	return nil
 }
 
@@ -123,7 +118,7 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 		return nil, err
 	}
 
-	userDB, exists := s.db.userMap[userID]
+	_, exists := s.db.userMap.Load(userID)
 
 	if !exists {
 		return nil, fmt.Errorf("get events error: user id is missed in db: %d", userID)
@@ -131,11 +126,18 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 
 	result := make([]storage.Event, 0)
 
-	for _, event := range userDB.events {
-		if event.StartDate.After(startDate) && event.EndDate.Before(endDate) {
-			result = append(result, event)
-		}
-	}
+	s.db.eventsMap.Range(
+		func(_, value any) bool {
+			e, ok := value.(storage.Event)
+			if ok &&
+				e.StartDate.After(startDate) &&
+				e.EndDate.Before(endDate) &&
+				e.UserID == userID {
+				result = append(result, e)
+			}
+			return true
+		},
+	)
 
 	return result, nil
 }
@@ -144,11 +146,9 @@ func (s *Storage) CreateUser(_ context.Context, user storage.User) (storage.User
 	userID := int(atomic.AddInt32(&newUserID, 1))
 	user.ID = userID
 
-	userDB := userDB{User: user, events: make(map[int]storage.Event)}
+	s.db.userMap.Store(user.ID, user)
 
-	s.db.userMap[user.ID] = userDB
-
-	return storage.User{}, nil
+	return user, nil
 }
 
 func (s *Storage) GetUser(ctx context.Context) (storage.User, error) {
@@ -156,7 +156,12 @@ func (s *Storage) GetUser(ctx context.Context) (storage.User, error) {
 	if err != nil {
 		return storage.User{}, err
 	}
-	return s.db.userMap[userID].User, nil
+	u, ok := s.db.userMap.Load(userID)
+
+	if !ok {
+		return storage.User{}, nil
+	}
+	return u.(storage.User), nil
 }
 
 func (s *Storage) UpdateUser(ctx context.Context, user storage.User) (storage.User, error) {
@@ -164,13 +169,8 @@ func (s *Storage) UpdateUser(ctx context.Context, user storage.User) (storage.Us
 	if err != nil {
 		return user, err
 	}
-
-	userDB := s.db.userMap[userID]
-	userDB.User = user
-	s.mu.Lock()
-	s.db.userMap[userID] = userDB
-	s.mu.Unlock()
-	return s.db.userMap[userID].User, nil
+	s.db.userMap.Store(userID, user)
+	return user, nil
 }
 
 func (s *Storage) DeleteUser(ctx context.Context) error {
@@ -178,7 +178,7 @@ func (s *Storage) DeleteUser(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	delete(s.db.userMap, userID)
+	s.db.userMap.Delete(userID)
 
 	return nil
 }
@@ -201,4 +201,8 @@ func getUserID(ctx context.Context, operationName string) (int, error) {
 		return userID, fmt.Errorf("user id is missed in ctx for %s: %v", operationName, ctx.Value("user_id"))
 	}
 	return userID, nil
+}
+
+func getUserEventKey(userID, eventID int) string {
+	return fmt.Sprintf("%d/%d", userID, eventID)
 }

@@ -37,7 +37,7 @@ type Application interface {
 func NewServer(logger app.Logger, app Application, conf ServerConf) *Server {
 	calendarRouter := http.NewServeMux()
 
-	calendarRouter.HandleFunc("/hello", loggingMiddleware(helloHandler, logger))
+	calendarRouter.Handle("/hello", loggingMiddleware(http.HandlerFunc(helloHandler), logger))
 	httpServer := &http.Server{
 		ReadHeaderTimeout: 3 * time.Second,
 		Addr:              fmt.Sprintf("%s:%d", conf.Host, conf.Port),

@@ -7,11 +7,10 @@ CREATE DATABASE calendar;
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY ,
   name TEXT NOT NULL,
-  second_name TEXT NOT NULL,
   email TEXT NOT NULL
 );
 
---INSERT INTO users (name, second_name, email) VALUES ( 'Sergey', 'Murashko', 'sergey-test@test.ru');
+--INSERT INTO users (name, email) VALUES ( 'Sergey Murashko', 'sergey-test@test.ru');
 --select * from users;
 
 

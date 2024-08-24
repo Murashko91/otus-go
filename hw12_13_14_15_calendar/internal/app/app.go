@@ -7,6 +7,19 @@ import (
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 )
 
+type Application interface {
+	CreateUser(context.Context, storage.User) (storage.User, error)
+	GetUser(context.Context) (storage.User, error)
+	UpdateUser(context.Context, storage.User) (storage.User, error)
+	DeleteUser(context.Context) error
+	CreateEvent(context.Context, storage.Event) (storage.Event, error)
+	UpdateEvent(context.Context, storage.Event) (storage.Event, error)
+	DeleteEvent(context.Context, int) error
+	GetDailyEvents(context.Context, time.Time) ([]storage.Event, error)
+	GetWeeklyEvents(context.Context, time.Time) ([]storage.Event, error)
+	GetMonthlyEvents(context.Context, time.Time) ([]storage.Event, error)
+}
+
 type App struct {
 	storage Storage
 	Logger

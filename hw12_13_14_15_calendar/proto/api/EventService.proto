@@ -1,0 +1,44 @@
+syntax = "proto3";
+option go_package = "./event";
+import "google/protobuf/timestamp.proto";
+
+
+package event;
+
+service EventAPI{
+    rpc CreateEvent(AlterEventRequest) returns (Response){}
+    rpc UpdateEvent(AlterEventRequest) returns (Response){}
+    rpc DeleteEvent(AlterEventRequest) returns (Response){}
+    rpc GetDailyEvents(GetEventsRequest) returns (Response){}
+    rpc GetWeeklyEvents(GetEventsRequest) returns (Response){}
+    rpc GetMonthlyEvents(GetEventsRequest) returns (Response){}
+}
+
+message AlterEventRequest{
+    int32 userID = 1;
+    Event event = 2;
+
+}
+
+message Event {
+    int32 ID = 1;
+    int32 userID = 2;
+    string title = 3;
+    string desc = 4;
+    google.protobuf.Timestamp startDate = 5;
+    google.protobuf.Timestamp endDate = 6;
+}
+message Events {
+    repeated Event events = 1;
+}
+
+message Response{
+
+    int32 statusCode = 1;
+    Events events = 2;
+}
+
+message GetEventsRequest{
+    google.protobuf.Timestamp date = 1;
+    int32 userID = 2;
+}

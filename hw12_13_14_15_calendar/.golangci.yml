@@ -20,7 +20,6 @@ linters-settings:
         - "github.com/jmoiron/sqlx"
         - "github.com/murashko91/otus-go/hw12_13_14_15_calendar"
         - "github.com/jackc/pgx/stdlib"
-        
 
 issues:
   exclude-rules:
@@ -43,6 +42,7 @@ linters:
     - errorlint
     - exhaustive
     - exportloopref
+   # - copyloopvar
     - funlen
     - gci
     - gocognit

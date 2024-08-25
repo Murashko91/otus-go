@@ -24,7 +24,7 @@ message Event {
     int32 ID = 1;
     int32 userID = 2;
     string title = 3;
-    string desc = 4;
+    string descr = 4;
     google.protobuf.Timestamp startDate = 5;
     google.protobuf.Timestamp endDate = 6;
 }
@@ -39,6 +39,7 @@ message Response{
 }
 
 message GetEventsRequest{
-    google.protobuf.Timestamp date = 1;
-    int32 userID = 2;
+    int32 userID = 1;
+    google.protobuf.Timestamp date = 2;
+
 }

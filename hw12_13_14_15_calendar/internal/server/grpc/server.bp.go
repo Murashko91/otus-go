@@ -16,14 +16,15 @@ type EventServer struct {
 	Logger app.Logger
 }
 
-func (es EventServer) CreateEvent(ctx context.Context, request *grpc_events.AlterEventRequest) (*grpc_events.Response, error) {
-
+func (es EventServer) CreateEvent(
+	ctx context.Context,
+	request *grpc_events.AlterEventRequest,
+) (*grpc_events.Response, error) {
 	userID := request.GetUserID()
 	eventToInsert := getStorageEvent(request.GetEvent())
 
 	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
 	sEvent, err := es.App.CreateEvent(ctx, eventToInsert)
-
 	if err != nil {
 		return createResponse(codes.Unknown), err
 	}
@@ -31,27 +32,31 @@ func (es EventServer) CreateEvent(ctx context.Context, request *grpc_events.Alte
 	return createResponse(codes.OK, sEvent), nil
 }
 
-func (es EventServer) UpdateEvent(ctx context.Context, request *grpc_events.AlterEventRequest) (*grpc_events.Response, error) {
-
+func (es EventServer) UpdateEvent(
+	ctx context.Context,
+	request *grpc_events.AlterEventRequest,
+) (*grpc_events.Response, error) {
 	userID := request.GetUserID()
 	eventToUpdate := getStorageEvent(request.GetEvent())
 
 	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
 	sEvent, err := es.App.UpdateEvent(ctx, eventToUpdate)
-
 	if err != nil {
 		return createResponse(codes.Unknown), err
 	}
 
 	return createResponse(codes.OK, sEvent), nil
 }
-func (es EventServer) DeleteEvent(ctx context.Context, request *grpc_events.AlterEventRequest) (*grpc_events.Response, error) {
+
+func (es EventServer) DeleteEvent(
+	ctx context.Context,
+	request *grpc_events.AlterEventRequest,
+) (*grpc_events.Response, error) {
 	userID := request.GetUserID()
 	eventToUpdate := getStorageEvent(request.GetEvent())
 
 	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
 	err := es.App.DeleteEvent(ctx, eventToUpdate.ID)
-
 	if err != nil {
 		return createResponse(codes.Unknown), err
 	}
@@ -59,40 +64,47 @@ func (es EventServer) DeleteEvent(ctx context.Context, request *grpc_events.Alte
 	return createResponse(codes.OK), nil
 }
 
-func (es EventServer) GetDailyEvents(ctx context.Context, request *grpc_events.GetEventsRequest) (*grpc_events.Response, error) {
-
+func (es EventServer) GetDailyEvents(
+	ctx context.Context,
+	request *grpc_events.GetEventsRequest,
+) (*grpc_events.Response, error) {
 	userID := request.GetUserID()
 	startDate := request.GetDate().AsTime()
 
 	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
 	sEvents, err := es.App.GetDailyEvents(ctx, startDate)
-
 	if err != nil {
 		return createResponse(codes.Unknown), err
 	}
 
 	return createResponse(codes.OK, sEvents...), nil
 }
-func (es EventServer) GetWeeklyEvents(ctx context.Context, request *grpc_events.GetEventsRequest) (*grpc_events.Response, error) {
+
+func (es EventServer) GetWeeklyEvents(
+	ctx context.Context,
+	request *grpc_events.GetEventsRequest,
+) (*grpc_events.Response, error) {
 	userID := request.GetUserID()
 	startDate := request.GetDate().AsTime()
 
 	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
 	sEvents, err := es.App.GetWeeklyEvents(ctx, startDate)
-
 	if err != nil {
 		return createResponse(codes.Unknown), err
 	}
 
 	return createResponse(codes.OK, sEvents...), nil
 }
-func (es EventServer) GetMonthlyEvents(ctx context.Context, request *grpc_events.GetEventsRequest) (*grpc_events.Response, error) {
+
+func (es EventServer) GetMonthlyEvents(
+	ctx context.Context,
+	request *grpc_events.GetEventsRequest,
+) (*grpc_events.Response, error) {
 	userID := request.GetUserID()
 	startDate := request.GetDate().AsTime()
 
 	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
 	sEvents, err := es.App.GetMonthlyEvents(ctx, startDate)
-
 	if err != nil {
 		return createResponse(codes.Unknown), err
 	}
@@ -101,7 +113,6 @@ func (es EventServer) GetMonthlyEvents(ctx context.Context, request *grpc_events
 }
 
 func getStorageEvent(event *grpc_events.Event) storage.Event {
-
 	return storage.Event{
 		UserID:    int(event.GetUserID()),
 		Title:     event.GetTitle(),
@@ -112,24 +123,21 @@ func getStorageEvent(event *grpc_events.Event) storage.Event {
 }
 
 func getGRPCEvent(event storage.Event) *grpc_events.Event {
-
 	return &grpc_events.Event{
-		UserID:    int32(event.ID),
+		UserID:    int32(event.ID), //nolint:gosec
 		Title:     event.Title,
 		Descr:     event.Descr,
 		StartDate: timestamppb.New(event.StartDate),
 		EndDate:   timestamppb.New(event.EndDate),
 	}
-
 }
 
 func createResponse(rCode codes.Code, sEvents ...storage.Event) *grpc_events.Response {
-
 	events := make([]*grpc_events.Event, 0, len(sEvents))
 
 	if len(sEvents) == 0 {
 		return &grpc_events.Response{
-			StatusCode: int32(rCode),
+			StatusCode: int32(rCode), //nolint:gosec
 		}
 	}
 
@@ -138,10 +146,9 @@ func createResponse(rCode codes.Code, sEvents ...storage.Event) *grpc_events.Res
 	}
 
 	return &grpc_events.Response{
-		StatusCode: int32(rCode),
+		StatusCode: int32(rCode), //nolint:gosec
 		Events: &grpc_events.Events{
 			Events: events,
 		},
 	}
-
 }

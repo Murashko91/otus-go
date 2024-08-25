@@ -71,18 +71,15 @@ func handleGetEvents(w http.ResponseWriter, r *http.Request, a app.Application) 
 	w.WriteHeader(http.StatusOK)
 
 	jsonData, err := json.Marshal(events)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	}
 	w.Write(jsonData)
-
 }
 
 func handleInsertEvent(w http.ResponseWriter, r *http.Request, a app.Application) {
 	handleAlterEvents(w, r, a, "insert")
-
 }
 
 func handleUpdateEvent(w http.ResponseWriter, r *http.Request, a app.Application) {
@@ -94,7 +91,6 @@ func handleDeleteEvents(w http.ResponseWriter, r *http.Request, a app.Applicatio
 }
 
 func handleAlterEvents(w http.ResponseWriter, r *http.Request, a app.Application, cmd string) {
-
 	userID := r.URL.Query().Get(app.UserIDKey)
 
 	uid, err := strconv.Atoi(userID)
@@ -134,7 +130,6 @@ func handleAlterEvents(w http.ResponseWriter, r *http.Request, a app.Application
 }
 
 func setInsertUpdateEventResponse(event storage.Event, err error, w http.ResponseWriter) {
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -143,23 +138,19 @@ func setInsertUpdateEventResponse(event storage.Event, err error, w http.Respons
 	w.WriteHeader(http.StatusOK)
 
 	jsonResponse, err := json.Marshal(event)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
 	w.Write(jsonResponse)
-
 }
 
 func setDeleteEventResponse(err error, w http.ResponseWriter) {
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-
 }

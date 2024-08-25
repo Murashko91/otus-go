@@ -38,7 +38,6 @@ func NewServer(logger app.Logger, app app.Application, conf ServerConf) *Server 
 }
 
 func (s Server) Start(ctx context.Context) error {
-
 	lsn, err := net.Listen("tcp", s.address)
 	if err != nil {
 		return err

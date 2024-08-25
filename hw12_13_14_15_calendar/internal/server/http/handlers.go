@@ -16,8 +16,6 @@ type Handler struct {
 	app app.Application
 }
 
-const userIDKey = "user_id"
-
 func (h Handler) eventHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -62,7 +60,7 @@ func handleGetEvents(w http.ResponseWriter, r *http.Request, a app.Application) 
 	case "month":
 		events, err = a.GetMonthlyEvents(ctx, dt)
 	default:
-		w.Write([]byte(fmt.Sprintf("missed or incorrect duration, should be one of (day, week, month)\n")))
+		w.Write([]byte("missed or incorrect duration, should be one of (day, week, month)\n"))
 	}
 
 	if err != nil {

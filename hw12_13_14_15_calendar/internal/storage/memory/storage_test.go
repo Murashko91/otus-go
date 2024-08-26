@@ -30,6 +30,7 @@ func TestEventStorage(t *testing.T) {
 
 		// create Events
 		for i := 0; i < count; i++ {
+			i := i
 			currentTime := time.Now()
 			go func() {
 				newEvent, err := memory.CreateEvent(ctx,
@@ -52,6 +53,7 @@ func TestEventStorage(t *testing.T) {
 		// update Events
 		wg.Add(count)
 		for i := 0; i < count; i++ {
+			i := i
 			currentTime := time.Now()
 			go func() {
 				newEvent, err := memory.UpdateEvent(ctx,
@@ -80,6 +82,7 @@ func TestEventStorage(t *testing.T) {
 			2: 31,
 		}
 		for i := 0; i < 3; i++ {
+			i := i
 			go func() {
 				getEventsFunc := getEventQueryMetod(i, memory)
 				events, err := getEventsFunc(ctx, time.Now())
@@ -96,6 +99,7 @@ func TestEventStorage(t *testing.T) {
 		// update Events
 		wg.Add(count)
 		for i := 0; i < count; i++ {
+			i := i
 			go func() {
 				err := memory.DeleteEvent(ctx, i)
 				wg.Done()

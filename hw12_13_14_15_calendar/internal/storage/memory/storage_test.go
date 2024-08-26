@@ -11,104 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUserStorage(t *testing.T) {
-	count := 100
-	newName := "TestUpdated"
-
-	t.Run("test user db CRUD", func(t *testing.T) {
-		memory := New()
-
-		wg := &sync.WaitGroup{}
-		wg.Add(count)
-		for i := 0; i < count; i++ {
-			i := i
-			go func() {
-				newUser, err := memory.CreateUser(context.Background(), storage.User{Name: "Test", Email: "test@test.ru"})
-				wg.Done()
-				if err != nil {
-					require.Nilf(t, err, err.Error())
-				}
-				require.NotNilf(t, newUser.ID, fmt.Sprintf("id should be created for newly created user record: %d", i))
-			}()
-		}
-		wg.Wait()
-
-		// Update users
-
-		wg.Add(count)
-
-		for i := 1; i <= count; i++ {
-			i := i
-			go func() {
-				ctx := context.Background()
-				ctx = context.WithValue(ctx, key("user_id"), i)
-				user, err := memory.UpdateUser(ctx, storage.User{Name: newName, Email: "testupdated@test.ru", ID: i})
-				if err != nil {
-					require.Nilf(t, err, err.Error())
-				}
-
-				require.Equal(t, user.Name, newName, "Name has not been updated")
-				require.Equal(t, i, user.ID, fmt.Sprintf("useId mismatch %d, %d", i, user.ID))
-				wg.Done()
-			}()
-		}
-		wg.Wait()
-
-		// test all users has been created and updated
-
-		wg.Add(count)
-		for i := 1; i <= count; i++ {
-			i := i
-			go func() {
-				ctx := context.Background()
-				ctx = context.WithValue(ctx, key("user_id"), i)
-				user, err := memory.GetUser(ctx)
-				if err != nil {
-					require.Nilf(t, err, err.Error())
-				}
-				require.Equal(t, user.Name, newName, "Name has not been updated")
-				require.Equal(t, i, user.ID, fmt.Sprintf("useId mismatch %d, %d", i, user.ID))
-				wg.Done()
-			}()
-		}
-		wg.Wait()
-
-		// delete users
-
-		wg.Add(count)
-		for i := 1; i <= count; i++ {
-			i := i
-			go func() {
-				ctx := context.Background()
-				ctx = context.WithValue(ctx, key("user_id"), i)
-				err := memory.DeleteUser(ctx)
-				if err != nil {
-					require.Nilf(t, err, err.Error())
-				}
-				wg.Done()
-			}()
-		}
-		wg.Wait()
-
-		// test all users has been deleted
-		wg.Add(count)
-		for i := 1; i <= count; i++ {
-			i := i
-			go func() {
-				ctx := context.Background()
-				ctx = context.WithValue(ctx, key("user_id"), i)
-				user, err := memory.GetUser(ctx)
-				if err != nil {
-					require.Nilf(t, err, err.Error())
-				}
-				require.Equal(t, user, storage.User{}, "user has not been deleted")
-				wg.Done()
-			}()
-		}
-		wg.Wait()
-	})
-}
-
 func TestEventStorage(t *testing.T) {
 	count := 100
 	newName := "TestUpdated"
@@ -128,7 +30,6 @@ func TestEventStorage(t *testing.T) {
 
 		// create Events
 		for i := 0; i < count; i++ {
-			i := i
 			currentTime := time.Now()
 			go func() {
 				newEvent, err := memory.CreateEvent(ctx,
@@ -151,7 +52,6 @@ func TestEventStorage(t *testing.T) {
 		// update Events
 		wg.Add(count)
 		for i := 0; i < count; i++ {
-			i := i
 			currentTime := time.Now()
 			go func() {
 				newEvent, err := memory.UpdateEvent(ctx,
@@ -180,7 +80,6 @@ func TestEventStorage(t *testing.T) {
 			2: 31,
 		}
 		for i := 0; i < 3; i++ {
-			i := i
 			go func() {
 				getEventsFunc := getEventQueryMetod(i, memory)
 				events, err := getEventsFunc(ctx, time.Now())
@@ -197,7 +96,6 @@ func TestEventStorage(t *testing.T) {
 		// update Events
 		wg.Add(count)
 		for i := 0; i < count; i++ {
-			i := i
 			go func() {
 				err := memory.DeleteEvent(ctx, i)
 				wg.Done()

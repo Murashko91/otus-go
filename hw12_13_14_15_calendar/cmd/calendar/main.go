@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"os"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -72,7 +71,6 @@ func main() {
 	go func() {
 		if err := server.Start(ctx); err != nil {
 			logg.Error("failed to start http server: " + err.Error())
-
 		}
 		wg.Done()
 	}()
@@ -87,6 +85,4 @@ func main() {
 	wg.Wait()
 
 	cancel()
-	os.Exit(1)
-
 }

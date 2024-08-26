@@ -166,10 +166,9 @@ func getUserIDWithCheck(ctx context.Context, id int, operationName string) (int,
 func getUserID(ctx context.Context, operationName string) (int, error) {
 	userID, ok := app.GetContextValue(ctx, app.UserIDKey).(int)
 
-	fmt.Println("BBBBBB")
 	fmt.Println(userID)
 	if !ok {
-		return userID, fmt.Errorf("user id is missed in ctx forrrr %s: %v", operationName, app.GetContextValue(ctx, app.UserIDKey))
+		return userID, fmt.Errorf("user id is missed in ctx %s: %v", operationName, app.GetContextValue(ctx, app.UserIDKey))
 	}
 	return userID, nil
 }

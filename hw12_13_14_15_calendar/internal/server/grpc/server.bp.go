@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
@@ -23,7 +24,10 @@ func (es EventServer) CreateEvent(
 	userID := request.GetUserID()
 	eventToInsert := getStorageEvent(request.GetEvent())
 
-	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
+	ctx = app.SetContextValue(ctx, app.UserIDKey, int(userID))
+	///AAAAAAA
+	fmt.Println("CONTEXT SET")
+	fmt.Println(app.GetContextValue(ctx, app.UserIDKey))
 	sEvent, err := es.App.CreateEvent(ctx, eventToInsert)
 	if err != nil {
 		return createResponse(codes.Unknown), err
@@ -124,7 +128,8 @@ func getStorageEvent(event *grpc_events.Event) storage.Event {
 
 func getGRPCEvent(event storage.Event) *grpc_events.Event {
 	return &grpc_events.Event{
-		UserID:    int32(event.ID), //nolint:gosec
+		UserID:    int32(event.UserID), //nolint:gosec
+		ID:        int32(event.ID),     //nolint:gosec
 		Title:     event.Title,
 		Descr:     event.Descr,
 		StartDate: timestamppb.New(event.StartDate),

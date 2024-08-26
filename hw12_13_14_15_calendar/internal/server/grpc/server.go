@@ -44,6 +44,7 @@ func (s Server) Start(ctx context.Context) error {
 	}
 
 	grpc_events.RegisterEventAPIServer(s.server, EventServer{App: s.app, Logger: s.logger})
+	s.logger.Info("calendar grpc is running...")
 
 	err = s.server.Serve(lsn)
 	ctx.Done()

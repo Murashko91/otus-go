@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 )
 
@@ -42,7 +43,7 @@ func (s *Storage) Close() error {
 }
 
 func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
-	if err := checkUserID(ctx, event.ID, "CreateEvent"); err != nil {
+	if err := checkUserID(ctx, event.UserID, "CreateEvent"); err != nil {
 		return event, err
 	}
 
@@ -58,7 +59,8 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage
 	}
 
 	lastInsertID := 0
-
+	fmt.Println("CCCCCC")
+	fmt.Println(s.db)
 	row := s.db.QueryRowContext(ctx, sql, sqlValues...)
 
 	if row.Err() != nil {
@@ -205,9 +207,9 @@ func (s *Storage) UpdateUser(ctx context.Context, user storage.User) (storage.Us
 }
 
 func (s *Storage) DeleteUser(ctx context.Context) error {
-	id, ok := ctx.Value("user_id").(int)
+	id, ok := app.GetContextValue(ctx, app.UserIDKey).(int)
 	if !ok {
-		return fmt.Errorf("delete user err: user id is missed in ctx: %v", ctx.Value("user_id"))
+		return fmt.Errorf("delete user err: user id is missed in ctx: %v", app.GetContextValue(ctx, app.UserIDKey))
 	}
 
 	sql := `delete users 
@@ -244,9 +246,9 @@ func checkUserID(ctx context.Context, id int, operationName string) error {
 }
 
 func getUserID(ctx context.Context, operationName string) (int, error) {
-	userID, ok := ctx.Value("user_id").(int)
+	userID, ok := app.GetContextValue(ctx, app.UserIDKey).(int)
 	if !ok {
-		return userID, fmt.Errorf("user id is missed in ctx for %s: %v", operationName, ctx.Value("user_id"))
+		return userID, fmt.Errorf("user id is missed in ctx forr %s: %v", operationName, ctx.Value("user_id"))
 	}
 	return userID, nil
 }

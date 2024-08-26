@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 )
 
@@ -69,10 +70,6 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage
 
 	if !exists {
 		return event, fmt.Errorf("update event error: user id is missed in db: %d", userID)
-	}
-
-	if event.UserID != userID {
-		return event, fmt.Errorf("mismatch user id for update event: %d and %d", userID, event.UserID)
 	}
 
 	userEventKey := getUserEventKey(userID, event.ID)
@@ -199,9 +196,12 @@ func getUserIDWithCheck(ctx context.Context, id int, operationName string) (int,
 }
 
 func getUserID(ctx context.Context, operationName string) (int, error) {
-	userID, ok := ctx.Value(key("user_id")).(int)
+	userID, ok := app.GetContextValue(ctx, app.UserIDKey).(int)
+
+	fmt.Println("BBBBBB")
+	fmt.Println(userID)
 	if !ok {
-		return userID, fmt.Errorf("user id is missed in ctx for %s: %v", operationName, ctx.Value("user_id"))
+		return userID, fmt.Errorf("user id is missed in ctx forrrr %s: %v", operationName, app.GetContextValue(ctx, app.UserIDKey))
 	}
 	return userID, nil
 }

@@ -25,7 +25,6 @@ func (es EventServer) CreateEvent(
 	eventToInsert := getStorageEvent(request.GetEvent())
 
 	ctx = app.SetContextValue(ctx, app.UserIDKey, int(userID))
-	///AAAAAAA
 	fmt.Println("CONTEXT SET")
 	fmt.Println(app.GetContextValue(ctx, app.UserIDKey))
 	sEvent, err := es.App.CreateEvent(ctx, eventToInsert)

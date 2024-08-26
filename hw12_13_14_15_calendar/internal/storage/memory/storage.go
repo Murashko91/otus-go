@@ -151,38 +151,6 @@ func (s *Storage) CreateUser(_ context.Context, user storage.User) (storage.User
 	return user, nil
 }
 
-func (s *Storage) GetUser(ctx context.Context) (storage.User, error) {
-	userID, err := getUserID(ctx, "GetUser")
-	if err != nil {
-		return storage.User{}, err
-	}
-	u, ok := s.db.userMap.Load(userID)
-
-	if !ok {
-		return storage.User{}, nil
-	}
-	return u.(storage.User), nil
-}
-
-func (s *Storage) UpdateUser(ctx context.Context, user storage.User) (storage.User, error) {
-	userID, err := getUserIDWithCheck(ctx, user.ID, "UpdateUser")
-	if err != nil {
-		return user, err
-	}
-	s.db.userMap.Store(userID, user)
-	return user, nil
-}
-
-func (s *Storage) DeleteUser(ctx context.Context) error {
-	userID, err := getUserID(ctx, "DeleteUser")
-	if err != nil {
-		return err
-	}
-	s.db.userMap.Delete(userID)
-
-	return nil
-}
-
 func getUserIDWithCheck(ctx context.Context, id int, operationName string) (int, error) {
 	userID, err := getUserID(ctx, operationName)
 	if err != nil {

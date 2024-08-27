@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
@@ -25,8 +24,6 @@ func (es EventServer) CreateEvent(
 	eventToInsert := getStorageEvent(request.GetEvent())
 
 	ctx = app.SetContextValue(ctx, app.UserIDKey, int(userID))
-	fmt.Println("CONTEXT SET")
-	fmt.Println(app.GetContextValue(ctx, app.UserIDKey))
 	sEvent, err := es.App.CreateEvent(ctx, eventToInsert)
 	if err != nil {
 		return createResponse(codes.Unknown), err

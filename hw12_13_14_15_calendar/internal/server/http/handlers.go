@@ -37,14 +37,15 @@ func handleGetEvents(w http.ResponseWriter, r *http.Request, a app.Application) 
 	dt, err := time.Parse(time.DateTime, startDate)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("missed or incorrect user id\n"))
+		w.Write([]byte(fmt.Sprintf("missed or incorrect format start date, should be: %s \n", time.DateTime)))
+
 		return
 	}
 
 	uid, err := strconv.Atoi(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("missed or incorrect format start date, should be: %s \n", time.DateTime)))
+		w.Write([]byte("missed or incorrect user id\n"))
 		return
 	}
 

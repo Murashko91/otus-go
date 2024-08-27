@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 	"github.com/stretchr/testify/require"
 )
@@ -17,13 +18,9 @@ func TestEventStorage(t *testing.T) {
 
 	t.Run("test event db CRUD", func(t *testing.T) {
 		memory := New()
+		userID := 1
 
-		newUser, err := memory.CreateUser(context.Background(), storage.User{Name: "Test", Email: "test@test.ru"})
-		if err != nil {
-			require.Nilf(t, err, err.Error())
-		}
-
-		ctx := context.WithValue(context.Background(), key("user_id"), newUser.ID)
+		ctx := app.SetContextValue(context.Background(), app.UserIDKey, userID)
 
 		wg := &sync.WaitGroup{}
 		wg.Add(count)
@@ -38,7 +35,7 @@ func TestEventStorage(t *testing.T) {
 						Descr:     "test",
 						StartDate: currentTime,
 						EndDate:   currentTime.Add(time.Hour * 24 * time.Duration(i)),
-						UserID:    newUser.ID,
+						UserID:    userID,
 					})
 				wg.Done()
 				if err != nil {
@@ -60,7 +57,7 @@ func TestEventStorage(t *testing.T) {
 						Descr:     "test",
 						StartDate: currentTime.Add(time.Second),
 						EndDate:   currentTime.Add(time.Hour * 24 * time.Duration(i)),
-						UserID:    newUser.ID,
+						UserID:    userID,
 						ID:        i,
 					})
 				wg.Done()

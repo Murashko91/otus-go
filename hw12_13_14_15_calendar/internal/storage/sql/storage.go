@@ -59,8 +59,7 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage
 	}
 
 	lastInsertID := 0
-	fmt.Println("CCCCCC")
-	fmt.Println(s.db)
+
 	row := s.db.QueryRowContext(ctx, sql, sqlValues...)
 
 	if row.Err() != nil {

@@ -90,7 +90,7 @@ func TestEventStorage(t *testing.T) {
 		}
 		wg.Wait()
 
-		// update Events
+		// delete Events
 		wg.Add(count)
 		for i := 0; i < count; i++ {
 			go func() {
@@ -104,6 +104,7 @@ func TestEventStorage(t *testing.T) {
 
 		wg.Wait()
 		events, err := memory.GetMonthlyEvents(ctx, time.Now().Add(time.Hour*-1))
+		fmt.Println(events)
 		if err != nil {
 			require.Nilf(t, err, err.Error())
 		}

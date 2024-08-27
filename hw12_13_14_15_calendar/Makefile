@@ -33,5 +33,9 @@ lint: install-lint-deps
 
 generate:
 	protoc ./proto/api/EventService.proto --go_out=./proto/gen/go --go-grpc_out=./proto/gen/go
+migrate-up:
+	goose -dir ./migrations postgres "$(psqlInfo)" up
+migrate-down:
+	goose -dir ./migrations postgres "$(psqlInfo)" down
 
 .PHONY: build run build-img run-img version test lint generate

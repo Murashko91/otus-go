@@ -13,10 +13,19 @@
 **Домашнее задание не принимается, если не принято ДЗ, предшедствующее ему.**
 
 
+## Migrations:
+
+1) Создать базу данных:
+**psql --host localhost --username postgres --password -c "create database calendar;"**
+2) Запустить  make migrate-up psqlInfo="CONNECTION_STRING"
+Example:
+make migrate-up psqlInfo="postgresql://postgres:postgres@127.0.0.1:5432/calendar?sslmode=disable" 
+3) Отскатить изменения можно командой  make migrate-down psqlInfo="CONNECTION_STRING"
+
+
 ### HTTP Server localhost:7777:
 
 **Postman в папке test_help**
-
 
 ### gRPC Server localhost:8888:
 

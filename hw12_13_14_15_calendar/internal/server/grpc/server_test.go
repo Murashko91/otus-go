@@ -42,7 +42,9 @@ func getClient() (grpc_events.EventAPIClient, func(), error) {
 	dialer := func(context.Context, string) (net.Conn, error) {
 		return lis.Dial()
 	}
-	conn, err := grpc.NewClient("passthrough:///", grpc.WithContextDialer(dialer), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("passthrough:///",
+		grpc.WithContextDialer(dialer),
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	closer := func() {
 		err := lis.Close()
@@ -89,7 +91,6 @@ func TestEventStorage(t *testing.T) {
 			require.Equalf(t, len(res.Events.Events), 1, "not expected response events length")
 			e := getStorageEvent(res.Events.Events[0])
 			require.NotEqual(t, e.ID, 0)
-
 		}
 
 		// test update events
@@ -152,9 +153,6 @@ func TestEventStorage(t *testing.T) {
 			res, err := c.DeleteEvent(context.Background(), &request)
 			require.NoError(t, err)
 			require.Equal(t, res.StatusCode, int32(codes.OK))
-
 		}
-
 	})
-
 }

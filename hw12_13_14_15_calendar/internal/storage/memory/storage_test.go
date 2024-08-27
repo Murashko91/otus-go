@@ -95,7 +95,6 @@ func TestEventStorage(t *testing.T) {
 		for i := 0; i < count; i++ {
 			go func() {
 				err := memory.DeleteEvent(ctx, i)
-
 				if err != nil {
 					require.Nilf(t, err, err.Error())
 				}

@@ -39,7 +39,7 @@ func (es EventServer) UpdateEvent(
 	userID := request.GetUserID()
 	eventToUpdate := getStorageEvent(request.GetEvent())
 
-	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
+	ctx = app.SetContextValue(ctx, app.UserIDKey, int(userID))
 	sEvent, err := es.App.UpdateEvent(ctx, eventToUpdate)
 	if err != nil {
 		return createResponse(codes.Unknown), err
@@ -55,7 +55,7 @@ func (es EventServer) DeleteEvent(
 	userID := request.GetUserID()
 	eventToUpdate := getStorageEvent(request.GetEvent())
 
-	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
+	ctx = app.SetContextValue(ctx, app.UserIDKey, int(userID))
 	err := es.App.DeleteEvent(ctx, eventToUpdate.ID)
 	if err != nil {
 		return createResponse(codes.Unknown), err
@@ -71,7 +71,7 @@ func (es EventServer) GetDailyEvents(
 	userID := request.GetUserID()
 	startDate := request.GetDate().AsTime()
 
-	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
+	ctx = app.SetContextValue(ctx, app.UserIDKey, int(userID))
 	sEvents, err := es.App.GetDailyEvents(ctx, startDate)
 	if err != nil {
 		return createResponse(codes.Unknown), err
@@ -87,7 +87,7 @@ func (es EventServer) GetWeeklyEvents(
 	userID := request.GetUserID()
 	startDate := request.GetDate().AsTime()
 
-	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
+	ctx = app.SetContextValue(ctx, app.UserIDKey, int(userID))
 	sEvents, err := es.App.GetWeeklyEvents(ctx, startDate)
 	if err != nil {
 		return createResponse(codes.Unknown), err
@@ -103,7 +103,7 @@ func (es EventServer) GetMonthlyEvents(
 	userID := request.GetUserID()
 	startDate := request.GetDate().AsTime()
 
-	ctx = app.SetContextValue(ctx, app.UserIDKey, userID)
+	ctx = app.SetContextValue(ctx, app.UserIDKey, int(userID))
 	sEvents, err := es.App.GetMonthlyEvents(ctx, startDate)
 	if err != nil {
 		return createResponse(codes.Unknown), err
@@ -114,6 +114,7 @@ func (es EventServer) GetMonthlyEvents(
 
 func getStorageEvent(event *grpc_events.Event) storage.Event {
 	return storage.Event{
+		ID:        int(event.ID),
 		UserID:    int(event.GetUserID()),
 		Title:     event.GetTitle(),
 		Descr:     event.GetDescr(),

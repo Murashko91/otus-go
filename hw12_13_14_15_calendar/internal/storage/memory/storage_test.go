@@ -95,16 +95,16 @@ func TestEventStorage(t *testing.T) {
 		for i := 0; i < count; i++ {
 			go func() {
 				err := memory.DeleteEvent(ctx, i)
-				wg.Done()
+
 				if err != nil {
 					require.Nilf(t, err, err.Error())
 				}
+				wg.Done()
 			}()
 		}
 
 		wg.Wait()
 		events, err := memory.GetMonthlyEvents(ctx, time.Now().Add(time.Hour*-1))
-		fmt.Println(events)
 		if err != nil {
 			require.Nilf(t, err, err.Error())
 		}

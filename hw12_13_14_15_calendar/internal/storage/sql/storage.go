@@ -78,10 +78,19 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage
 	}
 
 	sql := `UPDATE events SET 
-			title = :title, descr = :descr, start_date= :startdate, end_date = :enddate
- 			where id =:id and user_id = :userid;`
+			title = $1, descr = $2, start_date = $3, end_date = $4
+ 			where id = $5 and user_id = $6;`
 
-	_, err := s.db.NamedExecContext(ctx, sql, event)
+	sqlValues := []interface{}{
+		event.Title,
+		event.Descr,
+		event.StartDate,
+		event.EndDate,
+		event.ID,
+		event.UserID,
+	}
+
+	_, err := s.db.ExecContext(ctx, sql, sqlValues...)
 
 	return event, err
 }
@@ -92,8 +101,7 @@ func (s *Storage) DeleteEvent(ctx context.Context, id int) error {
 		return err
 	}
 
-	sql := `delete events 
-				where id = :$1 and user_id = :$2;`
+	sql := `delete from events where id = $1 and user_id = $2;`
 
 	_, err = s.db.ExecContext(ctx, sql, id, userID)
 
@@ -126,7 +134,7 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 
 	sql := `SELECT id, user_id, title, descr, start_date, end_date 
 	FROM events 
-	WHERE start_date > $1 AND  end_date < $2 and user_id = :$3`
+	WHERE start_date > $1 AND  end_date < $2 and user_id = $3`
 
 	rows, err := s.db.QueryxContext(ctx, sql, startDate, endDate, userID)
 	if err != nil {

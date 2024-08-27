@@ -73,7 +73,7 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage
 }
 
 func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
-	if err := checkUserID(ctx, event.ID, "UpdateEvent"); err != nil {
+	if err := checkUserID(ctx, event.UserID, "UpdateEvent"); err != nil {
 		return event, err
 	}
 

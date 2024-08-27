@@ -34,10 +34,10 @@ func handleGetEvents(w http.ResponseWriter, r *http.Request, a app.Application) 
 	startDate := r.URL.Query().Get("start_date")
 	duration := r.URL.Query().Get("duration")
 
-	dt, err := time.Parse(time.DateTime, startDate)
+	dt, err := time.Parse(time.RFC3339, startDate)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("missed or incorrect format start date, should be: %s \n", time.DateTime)))
+		w.Write([]byte(fmt.Sprintf("missed or incorrect format start date, should be: %s \n", time.RFC3339)))
 
 		return
 	}
@@ -97,7 +97,7 @@ func handleAlterEvents(w http.ResponseWriter, r *http.Request, a app.Application
 	uid, err := strconv.Atoi(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("missed or incorrect format start date, should be: %s \n", time.DateTime)))
+		w.Write([]byte(fmt.Sprintf("missed or incorrect format userId %s \n", userID)))
 		return
 	}
 

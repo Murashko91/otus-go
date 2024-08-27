@@ -33,7 +33,6 @@ func getClient() (grpc_events.EventAPIClient, func(), error) {
 	calendarApp := app.New(logger.New("info"), memorystorage.New())
 	grpc_events.RegisterEventAPIServer(baseServer, EventServer{App: calendarApp, Logger: calendarApp.Logger})
 	go func() {
-		fmt.Println("START SERVER")
 		if err := baseServer.Serve(lis); err != nil {
 			log.Printf("error serving server: %v", err)
 		}

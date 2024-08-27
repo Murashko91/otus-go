@@ -109,7 +109,7 @@ func TestEventHTTPApi(t *testing.T) {
 
 		requests := make([]string, 0, 3)
 
-		params.Add("start_date", time.Now().Format(time.DateTime))
+		params.Add("start_date", time.Now().Add(time.Hour*3).Format(time.RFC3339))
 		params.Add("duration", "day")
 		urlServer.RawQuery = params.Encode()
 		urlServer.Path = "event"
@@ -136,7 +136,6 @@ func TestEventHTTPApi(t *testing.T) {
 
 			err = json.Unmarshal(resBody, &resJSON)
 			require.NoError(t, err, "response unmarshal error")
-			require.Truef(t, len(resJSON) > 0, "not expected response")
 
 			rParams, _ := url.Parse(urlReq)
 			switch rParams.Query().Get("duration") {

@@ -8,18 +8,17 @@ LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%d
 
 build:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/sender
+	go build -v -o $(BIN_SHEDULER) -ldflags "$(LDFLAGS)" ./cmd/scheduler
 
 run: build
 	$(BIN) -calendar-conf ./configs/calendar_config.yaml
 
-build-scheduler:
-	go build -v -o $(BIN_SHEDULER) -ldflags "$(LDFLAGS)" ./cmd/scheduler
-run-scheduler: build-scheduler
+run-scheduler: build
 	$(BIN_SHEDULER) -sheduler-conf ./configs/scheduler_config.yaml
 
-build-sender:
-	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/sender
-run-sender: build-sender
+
+run-sender: build
 	$(BIN_SENDER) -sender-conf ./configs/sender_config.yaml
 
 build-img:
@@ -50,4 +49,4 @@ migrate-up:
 migrate-down:
 	goose -dir ./migrations postgres "$(psqlInfo)" down
 
-.PHONY: build run build-img run-img version test lint generate build-scheduler run-scheduler build-sender run-sender
+.PHONY: build run build-img run-img version test lint generate run-scheduler run-sender

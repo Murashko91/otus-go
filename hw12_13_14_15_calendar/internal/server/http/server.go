@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/config"
 )
 
 type Server struct {
@@ -20,7 +21,7 @@ type ServerConf struct {
 	Port int
 }
 
-func NewServer(logger app.Logger, app app.Application, conf ServerConf) *Server {
+func NewServer(logger app.Logger, app app.Application, conf config.Server) *Server {
 	calendarRouter := http.NewServeMux()
 
 	appHandler := Handler{

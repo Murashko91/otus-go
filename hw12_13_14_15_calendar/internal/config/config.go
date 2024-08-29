@@ -1,14 +1,12 @@
-package main
+package config
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
 )
 
-// При желании конфигурацию можно вынести в internal/config.
-// Организация конфига в main принуждает нас сужать API компонентов, использовать
-// при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
 	Logger   LoggerConf `yaml:"logger"`
 	Database DBConfig   `yaml:"db"`
@@ -35,6 +33,24 @@ type Server struct {
 	PortGRPC int    `yaml:"portgrpc"`
 }
 
+type SchedulerConf struct {
+	Scheduler Scheduler  `yaml:"mb"`
+	Logger    LoggerConf `yaml:"logger"`
+	Database  DBConfig   `yaml:"db"`
+}
+
+type Scheduler struct {
+	Host           string `yaml:"host"`
+	Port           int    `yaml:"port"`
+	UserName       string `yaml:"user"`
+	Password       string `yaml:"password"`
+	Exchange       string `yaml:"exchange"`
+	ExchangeType   string `yaml:"exchangeType"`
+	RoutingKey     string `yaml:"routingKey"`
+	IntervalCheck  int    `yaml:"intervalCheck"`
+	NotifyInterval int    `yaml:"notifyInterval"`
+}
+
 func NewCalendarConfig(configFilePath string) Config {
 	conf := &Config{}
 
@@ -47,6 +63,25 @@ func NewCalendarConfig(configFilePath string) Config {
 	if err = decoder.Decode(conf); err != nil {
 		panic(err)
 	}
+
+	return *conf
+}
+
+func NewSchedulerConf(configFilePath string) SchedulerConf {
+	conf := &SchedulerConf{}
+
+	file, err := os.Open(configFilePath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+	if err = decoder.Decode(conf); err != nil {
+		panic(err)
+	}
+
+	fmt.Println(conf)
 
 	return *conf
 }

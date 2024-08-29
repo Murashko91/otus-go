@@ -4,51 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"sync/atomic"
 	"time"
 
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/config"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"gopkg.in/yaml.v3"
 )
 
-type SchedulerConf struct {
-	Host           string `yaml:"host"`
-	Port           int    `yaml:"port"`
-	UserName       string `yaml:"user"`
-	Password       string `yaml:"password"`
-	Exchange       string `yaml:"exchange"`
-	ExchangeType   string `yaml:"exchangeType"`
-	RoutingKey     string `yaml:"routingKey"`
-	IntervalCheck  int    `yaml:"intervalCheck"`
-	NotifyInterval int    `yaml:"notifyInterval"`
-}
-
 type Scheduler struct {
-	conf   SchedulerConf
-	db     app.Storage
+	conf   config.Scheduler
+	db     storage.Storage
 	logger app.Logger
 	done   atomic.Bool
 }
 
-func NewScheduler(configFilePath string, db app.Storage, logger app.Logger) Scheduler {
-	conf := &SchedulerConf{}
+func NewScheduler(conf config.Scheduler, db storage.Storage, logger app.Logger) Scheduler {
 
-	file, err := os.Open(configFilePath)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	decoder := yaml.NewDecoder(file)
-	if err = decoder.Decode(conf); err != nil {
-		panic(err)
-	}
-
-	fmt.Println(conf)
-
-	return Scheduler{conf: *conf, db: db, logger: logger}
+	return Scheduler{conf: conf, db: db, logger: logger}
 }
 
 func (s *Scheduler) Run(ctx context.Context) {
@@ -131,7 +105,7 @@ func (s *Scheduler) Cancel() {
 	s.done.Store(true)
 }
 
-func getRMQConnectionString(conf SchedulerConf) string {
+func getRMQConnectionString(conf config.Scheduler) string {
 
 	fmt.Println("AAAAAA")
 	fmt.Println(conf)

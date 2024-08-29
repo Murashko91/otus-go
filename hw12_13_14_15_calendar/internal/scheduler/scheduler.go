@@ -28,7 +28,6 @@ func (s *Scheduler) Run(ctx context.Context) {
 	s.done.Store(false)
 
 	connection, channel, err := rmq.SetupRMQ(s.conf.RMQ)
-
 	if err != nil {
 		s.logger.Error(err.Error())
 		return

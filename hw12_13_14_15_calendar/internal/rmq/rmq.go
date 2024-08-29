@@ -8,7 +8,6 @@ import (
 )
 
 func SetupRMQ(conf config.RMQ) (*amqp.Connection, *amqp.Channel, error) {
-
 	uri := getRMQConnectionString(conf)
 
 	connection, err := amqp.Dial(uri)
@@ -17,7 +16,6 @@ func SetupRMQ(conf config.RMQ) (*amqp.Connection, *amqp.Channel, error) {
 			connection.Close()
 		}
 		return nil, nil, fmt.Errorf("error dial amqp: %s", err.Error())
-
 	}
 
 	channel, err := connection.Channel()
@@ -41,7 +39,6 @@ func SetupRMQ(conf config.RMQ) (*amqp.Connection, *amqp.Channel, error) {
 	}
 
 	return connection, channel, nil
-
 }
 
 func getRMQConnectionString(conf config.RMQ) string {

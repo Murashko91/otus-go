@@ -25,7 +25,6 @@ func NewSender(conf config.Sender, db storage.Storage, logger app.Logger) Sender
 
 func (s *Sender) Run(ctx context.Context) {
 	connection, channel, err := rmq.SetupRMQ(s.conf.RMQ)
-
 	if err != nil {
 		s.logger.Error(err.Error())
 		return

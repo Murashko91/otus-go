@@ -73,6 +73,23 @@ func (s *Storage) DeleteEvent(ctx context.Context, id int) error {
 	return nil
 }
 
+func (s *Storage) DeleteOutdatedEvents(_ context.Context) error {
+	keys := make([]interface{}, 0)
+
+	s.db.eventsMap.Range(
+		func(key, value any) bool {
+			e, ok := value.(storage.Event)
+			if ok &&
+				e.EndDate.Before(time.Now().AddDate(-1, 0, 0)) {
+				keys = append(keys, key)
+			}
+			return true
+		},
+	)
+
+	return nil
+}
+
 func (s *Storage) GetDailyEvents(ctx context.Context, startDate time.Time) ([]storage.Event, error) {
 	endDate := startDate.Add(time.Hour * 24)
 

@@ -15,6 +15,7 @@ type Storage interface {
 	GetWeeklyEvents(context.Context, time.Time) ([]Event, error)
 	GetMonthlyEvents(context.Context, time.Time) ([]Event, error)
 	GetEventsToSend(context.Context) ([]Event, error)
+	DeleteOutdatedEvents(context.Context) error
 }
 
 type Event struct {

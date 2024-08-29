@@ -73,6 +73,8 @@ func (s *Scheduler) Run(ctx context.Context) {
 			s.logger.Error("error publish data amqp:", err.Error())
 			time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
 		}
+
+		s.db.DeleteOutdatedEvents(ctx)
 		time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
 	}
 }

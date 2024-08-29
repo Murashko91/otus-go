@@ -11,14 +11,19 @@ import (
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/logger"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/scheduler"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/server/http"
 )
 
-var configFile string
+var configCalendarFile string
+var configSchedulerFile string
+var configSenderFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "./../configs/config.yaml", "Path to configuration file")
+	flag.StringVar(&configCalendarFile, "calendar-conf", "./../configs/calendar_config.yaml", "Path to configuration file")
+	flag.StringVar(&configSchedulerFile, "sheduler-conf", "./configs/scheduler_config.yaml", "Path to configuration file")
+	flag.StringVar(&configSenderFile, "sender-conf", "./configs/sender_config.yaml", "Path to configuration file")
 }
 
 func main() {
@@ -29,7 +34,7 @@ func main() {
 		return
 	}
 
-	config := NewConfig(configFile)
+	config := NewCalendarConfig(configCalendarFile)
 	logg := logger.New(config.Logger.Level)
 	storage := getStorage(config.Database)
 	if err := storage.Connect(); err != nil {
@@ -50,6 +55,9 @@ func main() {
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
+	sc := scheduler.NewScheduler(configSchedulerFile, storage, logg)
+	defer sc.Cancel()
+
 	go func() {
 		<-ctx.Done()
 
@@ -61,6 +69,7 @@ func main() {
 		}
 
 		grpcServer.Stop(ctx)
+		sc.Cancel()
 	}()
 
 	logg.Info("calendar is running...")
@@ -82,7 +91,10 @@ func main() {
 		wg.Done()
 	}()
 
+	go func() {
+		sc.Run(ctx)
+	}()
+
 	wg.Wait()
 
-	cancel()
 }

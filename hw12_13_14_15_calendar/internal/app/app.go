@@ -37,6 +37,7 @@ type Storage interface {
 	GetDailyEvents(context.Context, time.Time) ([]storage.Event, error)
 	GetWeeklyEvents(context.Context, time.Time) ([]storage.Event, error)
 	GetMonthlyEvents(context.Context, time.Time) ([]storage.Event, error)
+	GetEventsToSend(context.Context) ([]storage.Event, error)
 }
 
 func New(logger Logger, storage Storage) *App {

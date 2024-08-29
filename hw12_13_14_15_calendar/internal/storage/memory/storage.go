@@ -115,6 +115,25 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 	return result, nil
 }
 
+func (s *Storage) GetEventsToSend(_ context.Context) ([]storage.Event, error) {
+	result := make([]storage.Event, 0)
+
+	s.db.eventsMap.Range(
+		func(_, value any) bool {
+			e, ok := value.(storage.Event)
+			if ok &&
+				e.StartDate.After(time.Now()) &&
+				e.EndDate.Before(time.Now()) {
+
+				result = append(result, e)
+			}
+			return true
+		},
+	)
+
+	return result, nil
+}
+
 func getUserIDWithCheck(ctx context.Context, id int, operationName string) (int, error) {
 	userID, err := getUserID(ctx, operationName)
 	if err != nil {

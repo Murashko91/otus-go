@@ -35,7 +35,7 @@ type Server struct {
 	PortGRPC int    `yaml:"portgrpc"`
 }
 
-func NewConfig(configFilePath string) Config {
+func NewCalendarConfig(configFilePath string) Config {
 	conf := &Config{}
 
 	file, err := os.Open(configFilePath)

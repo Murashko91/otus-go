@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"os"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -79,7 +78,4 @@ func main() {
 	}()
 
 	wg.Wait()
-
-	os.Exit(1)
-
 }

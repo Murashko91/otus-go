@@ -127,7 +127,6 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, startDate time.Time) ([]s
 }
 
 func (s *Storage) GetEventsToSend(ctx context.Context) ([]storage.Event, error) {
-
 	sql := `SELECT id, user_id, title, descr, start_date, end_date 
 	FROM events 
 	WHERE start_date < $1 AND  end_date > $1`
@@ -151,8 +150,6 @@ func (s *Storage) GetEventsToSend(ctx context.Context) ([]storage.Event, error) 
 
 		events = append(events, qEvent)
 	}
-	fmt.Println("Events")
-	fmt.Println(events)
 	return events, getSelectEventsError(errorsStr)
 }
 

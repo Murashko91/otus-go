@@ -124,7 +124,6 @@ func (s *Storage) GetEventsToSend(_ context.Context) ([]storage.Event, error) {
 			if ok &&
 				e.StartDate.After(time.Now()) &&
 				e.EndDate.Before(time.Now()) {
-
 				result = append(result, e)
 			}
 			return true

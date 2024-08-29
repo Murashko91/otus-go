@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -40,15 +39,31 @@ type SchedulerConf struct {
 }
 
 type Scheduler struct {
-	Host           string `yaml:"host"`
-	Port           int    `yaml:"port"`
-	UserName       string `yaml:"user"`
-	Password       string `yaml:"password"`
-	Exchange       string `yaml:"exchange"`
-	ExchangeType   string `yaml:"exchangeType"`
-	RoutingKey     string `yaml:"routingKey"`
-	IntervalCheck  int    `yaml:"intervalCheck"`
-	NotifyInterval int    `yaml:"notifyInterval"`
+	Host          string `yaml:"host"`
+	Port          int    `yaml:"port"`
+	UserName      string `yaml:"user"`
+	Password      string `yaml:"password"`
+	Exchange      string `yaml:"exchange"`
+	ExchangeType  string `yaml:"exchangeType"`
+	RoutingKey    string `yaml:"routingKey"`
+	IntervalCheck int    `yaml:"intervalCheck"`
+}
+
+type SenderConf struct {
+	Sender   Sender     `yaml:"mb"`
+	Logger   LoggerConf `yaml:"logger"`
+	Database DBConfig   `yaml:"db"`
+}
+type Sender struct {
+	Host         string `yaml:"host"`
+	Port         int    `yaml:"port"`
+	UserName     string `yaml:"user"`
+	Password     string `yaml:"password"`
+	Exchange     string `yaml:"exchange"`
+	ExchangeType string `yaml:"exchangeType"`
+	Queue        string `yaml:"queue"`
+	BindKey      string `yaml:"bindKey"`
+	ConsumerTag  string `yaml:"consumerTag"`
 }
 
 func NewCalendarConfig(configFilePath string) Config {
@@ -81,7 +96,22 @@ func NewSchedulerConf(configFilePath string) SchedulerConf {
 		panic(err)
 	}
 
-	fmt.Println(conf)
+	return *conf
+}
+
+func NewSenderConf(configFilePath string) SenderConf {
+	conf := &SenderConf{}
+
+	file, err := os.Open(configFilePath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+	if err = decoder.Decode(conf); err != nil {
+		panic(err)
+	}
 
 	return *conf
 }

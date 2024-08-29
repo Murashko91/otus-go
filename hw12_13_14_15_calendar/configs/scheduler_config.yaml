@@ -6,10 +6,9 @@ mb:
   password: "guest"
   exchange: "calendar"
   exchangeType: "direct"
-  routingKey: "calendar"
+  routingKey: "calendar_routing_key"
   reliable: true
   intervalCheck: 5
-  notifyInterval: 1
 logger:
   level: "info"
 db:

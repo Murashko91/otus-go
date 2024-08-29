@@ -21,12 +21,10 @@ type Scheduler struct {
 }
 
 func NewScheduler(conf config.Scheduler, db storage.Storage, logger app.Logger) Scheduler {
-
 	return Scheduler{conf: conf, db: db, logger: logger}
 }
 
 func (s *Scheduler) Run(ctx context.Context) {
-
 	s.done.Store(false)
 	uri := getRMQConnectionString(s.conf)
 
@@ -64,7 +62,6 @@ func (s *Scheduler) Run(ctx context.Context) {
 		}
 
 		events, err := s.db.GetEventsToSend(ctx)
-
 		if err != nil {
 			s.logger.Error("error GetEventsToSend:", err.Error())
 			time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
@@ -72,7 +69,6 @@ func (s *Scheduler) Run(ctx context.Context) {
 		}
 
 		data, err := json.Marshal(events)
-
 		if err != nil {
 			s.logger.Error("error marshal EventsToSend:", err.Error())
 			time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
@@ -97,19 +93,12 @@ func (s *Scheduler) Run(ctx context.Context) {
 		}
 		time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
 	}
-
 }
 
 func (s *Scheduler) Cancel() {
-
 	s.done.Store(true)
 }
 
 func getRMQConnectionString(conf config.Scheduler) string {
-
-	fmt.Println("AAAAAA")
-	fmt.Println(conf)
-
 	return fmt.Sprintf("amqp://%s:%s@%s:%d/", conf.UserName, conf.Password, conf.Host, conf.Port)
-
 }

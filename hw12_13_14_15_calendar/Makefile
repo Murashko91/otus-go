@@ -1,5 +1,6 @@
 BIN := "./bin/calendar"
 BIN_SHEDULER := "./bin/scheduler"
+BIN_SENDER := "./bin/sender"
 DOCKER_IMG="calendar:develop"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
@@ -15,6 +16,11 @@ build-scheduler:
 	go build -v -o $(BIN_SHEDULER) -ldflags "$(LDFLAGS)" ./cmd/scheduler
 run-scheduler: build-scheduler
 	$(BIN_SHEDULER) -sheduler-conf ./configs/scheduler_config.yaml
+
+build-sender:
+	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/sender
+run-sender: build-sender
+	$(BIN_SENDER) -sender-conf ./configs/sender_config.yaml
 
 build-img:
 	docker build \
@@ -44,4 +50,4 @@ migrate-up:
 migrate-down:
 	goose -dir ./migrations postgres "$(psqlInfo)" down
 
-.PHONY: build run build-img run-img version test lint generate build-scheduler run-scheduler
+.PHONY: build run build-img run-img version test lint generate build-scheduler run-scheduler build-sender run-sender

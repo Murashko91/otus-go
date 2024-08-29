@@ -9,19 +9,19 @@ import (
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/config"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/logger"
-	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/scheduler"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/sender"
 )
 
-var configSchedulerFile string
+var confiFile string
 
 func init() {
-	flag.StringVar(&configSchedulerFile, "sheduler-conf", "./configs/scheduler_config.yaml", "Path to configuration file")
+	flag.StringVar(&confiFile, "sender-conf", "./configs/sender_config.yaml", "Path to configuration file")
 }
 
 func main() {
 	flag.Parse()
 
-	config := config.NewSchedulerConf(configSchedulerFile)
+	config := config.NewSenderConf(confiFile)
 
 	storage := getStorage(config.Database)
 	logg := logger.New(config.Logger.Level)
@@ -31,7 +31,7 @@ func main() {
 		return
 	}
 
-	sc := scheduler.NewScheduler(config.Scheduler, storage, logg)
+	sc := sender.NewSender(config.Sender, storage, logg)
 	defer sc.Cancel()
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
@@ -45,6 +45,6 @@ func main() {
 		sc.Cancel()
 	}()
 
-	logg.Info("scheduler is running...")
+	logg.Info("sender is running...")
 	sc.Run(ctx)
 }

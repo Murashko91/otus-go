@@ -1,13 +1,14 @@
 
 mb:
-  host: "localhost"
-  port: 5672
-  user: "guest"
-  password: "guest"
-  exchange: "calendar"
-  exchangeType: "direct"
+  rmq:
+    host: "localhost"
+    port: 5672
+    user: "guest"
+    password: "guest"
+    exchange: "calendar"
+    exchangeType: "direct"
+    routingKey: "calendar_routing_key"
   queue: "calendar_q"
-  bindKey: "calendar_routing_key"
   consumerTag: "sender_tag"
 logger:
   level: "info"

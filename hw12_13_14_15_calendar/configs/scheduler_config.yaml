@@ -1,13 +1,13 @@
 
 mb:
-  host: "localhost"
-  port: 5672
-  user: "guest"
-  password: "guest"
-  exchange: "calendar"
-  exchangeType: "direct"
-  routingKey: "calendar_routing_key"
-  reliable: true
+  rmq:
+    host: "localhost"
+    port: 5672
+    user: "guest"
+    password: "guest"
+    exchange: "calendar"
+    exchangeType: "direct"
+    routingKey: "calendar_routing_key"
   intervalCheck: 5
 logger:
   level: "info"

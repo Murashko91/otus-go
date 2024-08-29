@@ -39,14 +39,8 @@ type SchedulerConf struct {
 }
 
 type Scheduler struct {
-	Host          string `yaml:"host"`
-	Port          int    `yaml:"port"`
-	UserName      string `yaml:"user"`
-	Password      string `yaml:"password"`
-	Exchange      string `yaml:"exchange"`
-	ExchangeType  string `yaml:"exchangeType"`
-	RoutingKey    string `yaml:"routingKey"`
-	IntervalCheck int    `yaml:"intervalCheck"`
+	RMQ           RMQ `yaml:"rmq"`
+	IntervalCheck int `yaml:"intervalCheck"`
 }
 
 type SenderConf struct {
@@ -55,15 +49,19 @@ type SenderConf struct {
 	Database DBConfig   `yaml:"db"`
 }
 type Sender struct {
+	RMQ         RMQ    `yaml:"rmq"`
+	Queue       string `yaml:"queue"`
+	ConsumerTag string `yaml:"consumerTag"`
+}
+
+type RMQ struct {
 	Host         string `yaml:"host"`
 	Port         int    `yaml:"port"`
 	UserName     string `yaml:"user"`
 	Password     string `yaml:"password"`
 	Exchange     string `yaml:"exchange"`
 	ExchangeType string `yaml:"exchangeType"`
-	Queue        string `yaml:"queue"`
-	BindKey      string `yaml:"bindKey"`
-	ConsumerTag  string `yaml:"consumerTag"`
+	RoutingKey   string `yaml:"bindKey"`
 }
 
 func NewCalendarConfig(configFilePath string) Config {

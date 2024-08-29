@@ -3,10 +3,10 @@ package sender
 import (
 	"context"
 	"fmt"
-	"sync/atomic"
 
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/config"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/rmq"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -15,7 +15,6 @@ type Sender struct {
 	conf    config.Sender
 	db      storage.Storage
 	logger  app.Logger
-	done    atomic.Bool
 	conn    *amqp.Connection
 	channel *amqp.Channel
 }
@@ -25,39 +24,18 @@ func NewSender(conf config.Sender, db storage.Storage, logger app.Logger) Sender
 }
 
 func (s *Sender) Run(ctx context.Context) {
-	s.done.Store(false)
-	uri := getRMQConnectionString(s.conf)
+	connection, channel, err := rmq.SetupRMQ(s.conf.RMQ)
 
-	connection, err := amqp.Dial(uri)
-	s.conn = connection
 	if err != nil {
-		s.logger.Error("error dial amqp:", err.Error())
+		s.logger.Error(err.Error())
 		return
 	}
-	defer connection.Close()
 
+	defer connection.Close()
+	defer channel.Close()
 	s.logger.Info("sender connection established...")
 
-	channel, err := connection.Channel()
-	if err != nil {
-		s.logger.Error("error get connection channel amqp:", err.Error())
-		return
-	}
 	s.channel = channel
-
-	if err := channel.ExchangeDeclare(
-		s.conf.Exchange,     // name
-		s.conf.ExchangeType, // type
-		true,                // durable
-		false,               // auto-deleted
-		false,               // internal
-		true,                // noWait
-		nil,                 // arguments
-	); err != nil {
-		s.logger.Error("error ExchangeDeclare amqp:", err.Error())
-		return
-	}
-
 	queue, err := channel.QueueDeclare(
 		s.conf.Queue, // name of the queue
 		true,         // durable
@@ -72,11 +50,11 @@ func (s *Sender) Run(ctx context.Context) {
 	}
 
 	if err = channel.QueueBind(
-		queue.Name,      // name of the queue
-		s.conf.BindKey,  // bindingKey
-		s.conf.Exchange, // sourceExchange
-		false,           // noWait
-		nil,             // arguments
+		queue.Name,            // name of the queue
+		s.conf.RMQ.RoutingKey, // bindingKey
+		s.conf.RMQ.Exchange,   // sourceExchange
+		false,                 // noWait
+		nil,                   // arguments
 	); err != nil {
 		s.logger.Error("error Queue Bind amqp:", err.Error())
 	}
@@ -118,8 +96,4 @@ func (s *Sender) Cancel() {
 	if err := s.conn.Close(); err != nil {
 		s.logger.Error("AMQP connection close error:", err.Error())
 	}
-}
-
-func getRMQConnectionString(conf config.Sender) string {
-	return fmt.Sprintf("amqp://%s:%s@%s:%d/", conf.UserName, conf.Password, conf.Host, conf.Port)
 }

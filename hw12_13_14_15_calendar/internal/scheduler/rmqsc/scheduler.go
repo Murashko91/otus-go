@@ -74,7 +74,11 @@ func (s *Scheduler) Run(ctx context.Context) {
 			time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
 		}
 
-		s.db.DeleteOutdatedEvents(ctx)
+		s.logger.Info("Removing outdated events...")
+		err = s.db.DeleteOutdatedEvents(ctx)
+		if err != nil {
+			s.logger.Info("Removing outdated events error", err.Error())
+		}
 		time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
 	}
 }

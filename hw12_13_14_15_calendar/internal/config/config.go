@@ -61,7 +61,7 @@ type RMQ struct {
 	Password     string `yaml:"password"`
 	Exchange     string `yaml:"exchange"`
 	ExchangeType string `yaml:"exchangeType"`
-	RoutingKey   string `yaml:"bindKey"`
+	RoutingKey   string `yaml:"routingKey"`
 }
 
 func NewCalendarConfig(configFilePath string) Config {

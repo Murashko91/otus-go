@@ -9,7 +9,7 @@ import (
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/config"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/logger"
-	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/sender"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/sender/rmqs"
 )
 
 var confiFile string
@@ -31,7 +31,7 @@ func main() {
 		return
 	}
 
-	sc := sender.NewSender(config.Sender, storage, logg)
+	sc := rmqs.NewSender(config.Sender, storage, logg)
 	defer sc.Cancel()
 
 	ctx, cancel := signal.NotifyContext(context.Background(),

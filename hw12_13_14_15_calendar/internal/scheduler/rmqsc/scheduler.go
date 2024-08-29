@@ -1,4 +1,4 @@
-package scheduler
+package rmqsc
 
 import (
 	"context"
@@ -20,8 +20,8 @@ type Scheduler struct {
 	done   atomic.Bool
 }
 
-func NewScheduler(conf config.Scheduler, db storage.Storage, logger app.Logger) Scheduler {
-	return Scheduler{conf: conf, db: db, logger: logger}
+func NewScheduler(conf config.Scheduler, db storage.Storage, logger app.Logger) *Scheduler {
+	return &Scheduler{conf: conf, db: db, logger: logger}
 }
 
 func (s *Scheduler) Run(ctx context.Context) {

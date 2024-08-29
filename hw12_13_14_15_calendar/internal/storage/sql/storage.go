@@ -153,12 +153,20 @@ func (s *Storage) GetEventsToSend(ctx context.Context) ([]storage.Event, error) 
 	return events, getSelectEventsError(errorsStr)
 }
 
-func (s *Storage) DeleteOutdatedEvents(ctx context.Context) error {
+func (s *Storage) DeleteOutdatedEvents(ctx context.Context) (int, error) {
 	sql := `delete from events where end_date < $1;`
 
-	_, err := s.db.ExecContext(ctx, sql, time.Now().AddDate(-1, 0, 0))
+	result, err := s.db.ExecContext(ctx, sql, time.Now().AddDate(-1, 0, 0))
+	if err != nil {
+		return 0, err
+	}
 
-	return err
+	count, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), err
 }
 
 func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate time.Time) ([]storage.Event, error) {

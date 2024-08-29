@@ -73,7 +73,7 @@ func (s *Storage) DeleteEvent(ctx context.Context, id int) error {
 	return nil
 }
 
-func (s *Storage) DeleteOutdatedEvents(_ context.Context) error {
+func (s *Storage) DeleteOutdatedEvents(_ context.Context) (int, error) {
 	keys := make([]interface{}, 0)
 
 	s.db.eventsMap.Range(
@@ -87,7 +87,11 @@ func (s *Storage) DeleteOutdatedEvents(_ context.Context) error {
 		},
 	)
 
-	return nil
+	for k := range keys {
+		s.db.eventsMap.Delete(k)
+	}
+
+	return len(keys), nil
 }
 
 func (s *Storage) GetDailyEvents(ctx context.Context, startDate time.Time) ([]storage.Event, error) {

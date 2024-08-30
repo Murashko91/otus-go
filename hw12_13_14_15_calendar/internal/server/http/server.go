@@ -2,30 +2,48 @@ package internalhttp
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 )
 
-type Server struct { // TODO
+type Server struct {
+	server *http.Server
+	app    app.Application
+	logger app.Logger
 }
 
-type Logger interface { // TODO
+type ServerConf struct {
+	Host string
+	Port int
 }
 
-type Application interface { // TODO
-}
+func NewServer(logger app.Logger, app app.Application, conf ServerConf) *Server {
+	calendarRouter := http.NewServeMux()
 
-func NewServer(logger Logger, app Application) *Server {
-	return &Server{}
+	calendarRouter.Handle("/hello", loggingMiddleware(http.HandlerFunc(helloHandler), logger))
+	httpServer := &http.Server{
+		ReadHeaderTimeout: 3 * time.Second,
+		Addr:              fmt.Sprintf("%s:%d", conf.Host, conf.Port),
+		Handler:           calendarRouter,
+	}
+	return &Server{
+		server: httpServer,
+		app:    app,
+		logger: logger,
+	}
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	// TODO
-	<-ctx.Done()
-	return nil
+	err := s.server.ListenAndServe()
+	ctx.Done()
+	return err
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	// TODO
-	return nil
+	err := s.server.Shutdown(ctx)
+	<-ctx.Done()
+	return err
 }
-
-// TODO

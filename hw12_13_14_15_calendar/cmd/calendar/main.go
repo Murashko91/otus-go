@@ -8,16 +8,16 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "./../configs/config.yaml", "Path to configuration file")
 }
 
 func main() {
@@ -28,13 +28,14 @@ func main() {
 		return
 	}
 
-	config := NewConfig()
+	config := NewConfig(configFile)
 	logg := logger.New(config.Logger.Level)
-
-	storage := memorystorage.New()
+	storage := getStorage(config.Database)
 	calendar := app.New(logg, storage)
-
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(logg, calendar, internalhttp.ServerConf{
+		Host: config.Server.Host,
+		Port: config.Server.Port,
+	})
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -56,6 +57,7 @@ func main() {
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
+
 		os.Exit(1) //nolint:gocritic
 	}
 }

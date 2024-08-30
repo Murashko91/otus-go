@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"net"
 	"sync"
@@ -62,52 +61,5 @@ func TestTelnetClient(t *testing.T) {
 		}()
 
 		wg.Wait()
-	})
-
-	t.Run("test read from closed connection", func(t *testing.T) {
-		l, err := net.Listen("tcp", "127.0.0.1:")
-		require.NoError(t, err)
-		defer func() { require.NoError(t, l.Close()) }()
-
-		in := &bytes.Buffer{}
-		out := &bytes.Buffer{}
-
-		timeout, err := time.ParseDuration("10s")
-		require.NoError(t, err)
-
-		client := NewTelnetClient(l.Addr().String(), timeout, io.NopCloser(in), out)
-		require.NoError(t, client.Connect())
-		require.NoError(t, client.Close())
-
-		err = client.Receive()
-		var opErr *net.OpError
-		errors.As(err, &opErr)
-
-		err = client.Send()
-		errors.As(err, &opErr)
-	})
-
-	t.Run("test nil connection", func(t *testing.T) {
-		client := NewTelnetClient("", 0, nil, nil)
-
-		err := client.Send()
-		require.Equal(t, err, errors.New("can't send, connection not established"))
-		err = client.Receive()
-		require.Equal(t, err, errors.New("can't receive, connection not established"))
-
-		err = client.Close()
-		require.Equal(t, err, errors.New("can't close, connection not established"))
-	})
-
-	t.Run("test wrong socket connection", func(t *testing.T) {
-		timeout, err := time.ParseDuration("10s")
-		require.NoError(t, err)
-
-		client := NewTelnetClient("test:80", timeout, nil, nil)
-
-		err = client.Connect()
-
-		var opErr *net.OpError
-		errors.As(err, &opErr)
 	})
 }

@@ -29,8 +29,10 @@ type DBConfig struct {
 }
 
 type Server struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	HostGRPC string `yaml:"hostgrpc"`
+	PortGRPC int    `yaml:"portgrpc"`
 }
 
 func NewConfig(configFilePath string) Config {

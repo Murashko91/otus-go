@@ -6,7 +6,9 @@ db:
   user: "postgres"
   password: "postgres"
   dbName: "calendar"
-  inMemory: true
+  inMemory: false
 server:
   host: "localhost"
   port: 7777
+  hostgrpc: "localhost"
+  portgrpc: 8888

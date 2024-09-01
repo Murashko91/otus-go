@@ -1,0 +1,208 @@
+{
+	"info": {
+		"_postman_id": "145c0740-90bb-4a82-8052-19bcac02a658",
+		"name": "OTUS HTTP MurashkoS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2158307"
+	},
+	"item": [
+		{
+			"name": "create event",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Title\": \"test\",\n    \"Descr\": \"test\",\n    \"StartDate\": \"2006-01-02T15:04:05Z\",\n    \"EndDate\": \"2006-01-02T15:04:05Z\",\n    \"UserID\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7777/event?userID=1",
+					"host": [
+						"localhost"
+					],
+					"port": "7777",
+					"path": [
+						"event"
+					],
+					"query": [
+						{
+							"key": "userID",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update event",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Title\": \"test\",\n    \"Descr\": \"test\",\n    \"StartDate\": \"2006-01-02T15:04:05Z\",\n    \"EndDate\": \"2006-01-02T15:04:05Z\",\n    \"UserID\": 1,\n    \"ID\":6\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7777/event?userID=1",
+					"host": [
+						"localhost"
+					],
+					"port": "7777",
+					"path": [
+						"event"
+					],
+					"query": [
+						{
+							"key": "userID",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete event",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\n    \"UserID\": 1,\n    \"ID\":6\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7777/event?userID=1",
+					"host": [
+						"localhost"
+					],
+					"port": "7777",
+					"path": [
+						"event"
+					],
+					"query": [
+						{
+							"key": "userID",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get daily events",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7777/event?userID=1&start_date=2006-01-02T15:00:05Z&duration=day",
+					"host": [
+						"localhost"
+					],
+					"port": "7777",
+					"path": [
+						"event"
+					],
+					"query": [
+						{
+							"key": "userID",
+							"value": "1"
+						},
+						{
+							"key": "start_date",
+							"value": "2006-01-02T15:00:05Z"
+						},
+						{
+							"key": "duration",
+							"value": "day"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get weekly events",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7777/event?userID=1&start_date=2006-01-02T15:00:05Z&duration=week",
+					"host": [
+						"localhost"
+					],
+					"port": "7777",
+					"path": [
+						"event"
+					],
+					"query": [
+						{
+							"key": "userID",
+							"value": "1"
+						},
+						{
+							"key": "start_date",
+							"value": "2006-01-02T15:00:05Z"
+						},
+						{
+							"key": "duration",
+							"value": "week"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get monthly events",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7777/event?userID=1&start_date=2006-01-02T15:00:05Z&duration=month",
+					"host": [
+						"localhost"
+					],
+					"port": "7777",
+					"path": [
+						"event"
+					],
+					"query": [
+						{
+							"key": "userID",
+							"value": "1"
+						},
+						{
+							"key": "start_date",
+							"value": "2006-01-02T15:00:05Z"
+						},
+						{
+							"key": "duration",
+							"value": "month"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,6 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
 
+CREATE DATABASE calendar;
+
+
 CREATE TABLE IF NOT EXISTS events (
   id SERIAL PRIMARY KEY,
   user_id INT,

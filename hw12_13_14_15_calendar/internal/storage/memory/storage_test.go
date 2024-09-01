@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 	"github.com/stretchr/testify/require"
 )
@@ -18,15 +17,20 @@ func TestEventStorage(t *testing.T) {
 
 	t.Run("test event db CRUD", func(t *testing.T) {
 		memory := New()
-		userID := 1
 
-		ctx := app.SetContextValue(context.Background(), app.UserIDKey, userID)
+		newUser, err := memory.CreateUser(context.Background(), storage.User{Name: "Test", Email: "test@test.ru"})
+		if err != nil {
+			require.Nilf(t, err, err.Error())
+		}
+
+		ctx := context.WithValue(context.Background(), key("user_id"), newUser.ID)
 
 		wg := &sync.WaitGroup{}
 		wg.Add(count)
 
 		// create Events
 		for i := 0; i < count; i++ {
+			i := i
 			currentTime := time.Now()
 			go func() {
 				newEvent, err := memory.CreateEvent(ctx,
@@ -35,7 +39,7 @@ func TestEventStorage(t *testing.T) {
 						Descr:     "test",
 						StartDate: currentTime,
 						EndDate:   currentTime.Add(time.Hour * 24 * time.Duration(i)),
-						UserID:    userID,
+						UserID:    newUser.ID,
 					})
 				wg.Done()
 				if err != nil {
@@ -49,6 +53,7 @@ func TestEventStorage(t *testing.T) {
 		// update Events
 		wg.Add(count)
 		for i := 0; i < count; i++ {
+			i := i
 			currentTime := time.Now()
 			go func() {
 				newEvent, err := memory.UpdateEvent(ctx,
@@ -57,7 +62,7 @@ func TestEventStorage(t *testing.T) {
 						Descr:     "test",
 						StartDate: currentTime.Add(time.Second),
 						EndDate:   currentTime.Add(time.Hour * 24 * time.Duration(i)),
-						UserID:    userID,
+						UserID:    newUser.ID,
 						ID:        i,
 					})
 				wg.Done()
@@ -77,6 +82,7 @@ func TestEventStorage(t *testing.T) {
 			2: 31,
 		}
 		for i := 0; i < 3; i++ {
+			i := i
 			go func() {
 				getEventsFunc := getEventQueryMetod(i, memory)
 				events, err := getEventsFunc(ctx, time.Now())
@@ -90,15 +96,16 @@ func TestEventStorage(t *testing.T) {
 		}
 		wg.Wait()
 
-		// delete Events
+		// update Events
 		wg.Add(count)
 		for i := 0; i < count; i++ {
+			i := i
 			go func() {
 				err := memory.DeleteEvent(ctx, i)
+				wg.Done()
 				if err != nil {
 					require.Nilf(t, err, err.Error())
 				}
-				wg.Done()
 			}()
 		}
 

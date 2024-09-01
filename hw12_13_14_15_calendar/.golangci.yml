@@ -17,6 +17,10 @@ linters-settings:
         - "!$test"
         allow:
         - $gostd
+        - "github.com/jmoiron/sqlx"
+        - "github.com/murashko91/otus-go/hw12_13_14_15_calendar"
+        - "github.com/jackc/pgx/stdlib"
+        
 
 issues:
   exclude-rules:
@@ -38,7 +42,7 @@ linters:
     - durationcheck
     - errorlint
     - exhaustive
-    - copyloopvar
+    - exportloopref
     - funlen
     - gci
     - gocognit

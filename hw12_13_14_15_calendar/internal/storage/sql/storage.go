@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/storage"
 )
 
@@ -43,7 +42,7 @@ func (s *Storage) Close() error {
 }
 
 func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
-	if err := checkUserID(ctx, event.UserID, "CreateEvent"); err != nil {
+	if err := checkUserID(ctx, event.ID, "CreateEvent"); err != nil {
 		return event, err
 	}
 
@@ -73,24 +72,15 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage
 }
 
 func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
-	if err := checkUserID(ctx, event.UserID, "UpdateEvent"); err != nil {
+	if err := checkUserID(ctx, event.ID, "UpdateEvent"); err != nil {
 		return event, err
 	}
 
 	sql := `UPDATE events SET 
-			title = $1, descr = $2, start_date = $3, end_date = $4
- 			where id = $5 and user_id = $6;`
+			title = :title, descr = :descr, start_date= :startdate, end_date = :enddate
+ 			where id =:id and user_id = :userid;`
 
-	sqlValues := []interface{}{
-		event.Title,
-		event.Descr,
-		event.StartDate,
-		event.EndDate,
-		event.ID,
-		event.UserID,
-	}
-
-	_, err := s.db.ExecContext(ctx, sql, sqlValues...)
+	_, err := s.db.NamedExecContext(ctx, sql, event)
 
 	return event, err
 }
@@ -101,7 +91,8 @@ func (s *Storage) DeleteEvent(ctx context.Context, id int) error {
 		return err
 	}
 
-	sql := `delete from events where id = $1 and user_id = $2;`
+	sql := `delete events 
+				where id = :$1 and user_id = :$2;`
 
 	_, err = s.db.ExecContext(ctx, sql, id, userID)
 
@@ -134,7 +125,7 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 
 	sql := `SELECT id, user_id, title, descr, start_date, end_date 
 	FROM events 
-	WHERE start_date > $1 AND  end_date < $2 and user_id = $3`
+	WHERE start_date > $1 AND  end_date < $2 and user_id = :$3`
 
 	rows, err := s.db.QueryxContext(ctx, sql, startDate, endDate, userID)
 	if err != nil {
@@ -184,9 +175,9 @@ func checkUserID(ctx context.Context, id int, operationName string) error {
 }
 
 func getUserID(ctx context.Context, operationName string) (int, error) {
-	userID, ok := app.GetContextValue(ctx, app.UserIDKey).(int)
+	userID, ok := ctx.Value("user_id").(int)
 	if !ok {
-		return userID, fmt.Errorf("user id is missed in ctx forr %s: %v", operationName, ctx.Value("user_id"))
+		return userID, fmt.Errorf("user id is missed in ctx for %s: %v", operationName, ctx.Value("user_id"))
 	}
 	return userID, nil
 }

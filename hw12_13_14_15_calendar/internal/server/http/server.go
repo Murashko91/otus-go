@@ -23,11 +23,7 @@ type ServerConf struct {
 func NewServer(logger app.Logger, app app.Application, conf ServerConf) *Server {
 	calendarRouter := http.NewServeMux()
 
-	appHandler := Handler{
-		app: app,
-	}
-
-	calendarRouter.Handle("/event", loggingMiddleware(http.HandlerFunc(appHandler.eventHandler), logger))
+	calendarRouter.Handle("/hello", loggingMiddleware(http.HandlerFunc(helloHandler), logger))
 	httpServer := &http.Server{
 		ReadHeaderTimeout: 3 * time.Second,
 		Addr:              fmt.Sprintf("%s:%d", conf.Host, conf.Port),

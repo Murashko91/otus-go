@@ -26,16 +26,9 @@ test:
 	go test -race ./internal/...
 
 install-lint-deps:
-	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.60.3
+	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.55.2
 
 lint: install-lint-deps
 	golangci-lint run ./...
 
-generate:
-	protoc ./proto/api/EventService.proto --go_out=./proto/gen/go --go-grpc_out=./proto/gen/go
-migrate-up:
-	goose -dir ./migrations postgres "$(psqlInfo)" up
-migrate-down:
-	goose -dir ./migrations postgres "$(psqlInfo)" down
-
-.PHONY: build run build-img run-img version test lint generate
+.PHONY: build run build-img run-img version test lint

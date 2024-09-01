@@ -10,15 +10,16 @@ import (
 
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/config"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/logger"
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/server/http"
 )
 
-var configFile string
+var configCalendarFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "./../configs/config.yaml", "Path to configuration file")
+	flag.StringVar(&configCalendarFile, "calendar-conf", "./../configs/calendar_config.yaml", "Path to configuration file")
 }
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 		return
 	}
 
-	config := NewConfig(configFile)
+	config := config.NewCalendarConfig(configCalendarFile)
 	logg := logger.New(config.Logger.Level)
 	storage := getStorage(config.Database)
 	if err := storage.Connect(); err != nil {
@@ -37,14 +38,8 @@ func main() {
 		return
 	}
 	calendar := app.New(logg, storage)
-	server := internalhttp.NewServer(logg, calendar, internalhttp.ServerConf{
-		Host: config.Server.Host,
-		Port: config.Server.Port,
-	})
-	grpcServer := grpc.NewServer(logg, calendar, grpc.ServerConf{
-		Host: config.Server.HostGRPC,
-		Port: config.Server.PortGRPC,
-	})
+	server := internalhttp.NewServer(logg, calendar, config.Server)
+	grpcServer := grpc.NewServer(logg, calendar, config.Server)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -83,6 +78,4 @@ func main() {
 	}()
 
 	wg.Wait()
-
-	cancel()
 }

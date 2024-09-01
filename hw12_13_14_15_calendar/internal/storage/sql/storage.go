@@ -126,6 +126,49 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, startDate time.Time) ([]s
 	return s.getEvents(ctx, startDate, endDate)
 }
 
+func (s *Storage) GetEventsToSend(ctx context.Context) ([]storage.Event, error) {
+	sql := `SELECT id, user_id, title, descr, start_date, end_date 
+	FROM events 
+	WHERE start_date < $1 AND  end_date > $1`
+
+	rows, err := s.db.QueryxContext(ctx, sql, time.Now())
+	if err != nil {
+		return []storage.Event{}, err
+	}
+	defer rows.Close()
+
+	events := make([]storage.Event, 0)
+	errorsStr := make([]string, 0)
+	for rows.Next() {
+		var qEvent storage.Event
+
+		err := rows.StructScan(&qEvent)
+		if err != nil {
+			errorsStr = append(errorsStr, err.Error())
+			continue
+		}
+
+		events = append(events, qEvent)
+	}
+	return events, getSelectEventsError(errorsStr)
+}
+
+func (s *Storage) DeleteOutdatedEvents(ctx context.Context) (int, error) {
+	sql := `delete from events where end_date < $1;`
+
+	result, err := s.db.ExecContext(ctx, sql, time.Now().AddDate(-1, 0, 0))
+	if err != nil {
+		return 0, err
+	}
+
+	count, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), err
+}
+
 func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate time.Time) ([]storage.Event, error) {
 	userID, err := getUserID(ctx, "getEvents")
 	if err != nil {

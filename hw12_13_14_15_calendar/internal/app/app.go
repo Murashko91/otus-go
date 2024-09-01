@@ -17,7 +17,7 @@ type Application interface {
 }
 
 type App struct {
-	storage Storage
+	storage storage.Storage
 	Logger
 }
 
@@ -28,18 +28,7 @@ type Logger interface {
 	Error(msg ...any)
 }
 
-type Storage interface {
-	Connect() error
-	Close() error
-	CreateEvent(context.Context, storage.Event) (storage.Event, error)
-	UpdateEvent(context.Context, storage.Event) (storage.Event, error)
-	DeleteEvent(context.Context, int) error
-	GetDailyEvents(context.Context, time.Time) ([]storage.Event, error)
-	GetWeeklyEvents(context.Context, time.Time) ([]storage.Event, error)
-	GetMonthlyEvents(context.Context, time.Time) ([]storage.Event, error)
-}
-
-func New(logger Logger, storage Storage) *App {
+func New(logger Logger, storage storage.Storage) *App {
 	return &App{Logger: logger, storage: storage}
 }
 

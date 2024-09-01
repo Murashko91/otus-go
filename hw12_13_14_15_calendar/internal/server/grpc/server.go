@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
+	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/config"
 	grpc_events "github.com/murashko91/otus-go/hw12_13_14_15_calendar/proto/gen/go/event"
 	"google.golang.org/grpc"
 )
@@ -17,12 +18,7 @@ type Server struct {
 	server  *grpc.Server
 }
 
-type ServerConf struct {
-	Host string
-	Port int
-}
-
-func NewServer(logger app.Logger, app app.Application, conf ServerConf) *Server {
+func NewServer(logger app.Logger, app app.Application, conf config.Server) *Server {
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			UnaryServerRequestLoggerInterceptor(logger),
@@ -32,7 +28,7 @@ func NewServer(logger app.Logger, app app.Application, conf ServerConf) *Server 
 	return &Server{
 		app:     app,
 		logger:  logger,
-		address: fmt.Sprintf("%s:%d", conf.Host, conf.Port),
+		address: fmt.Sprintf("%s:%d", conf.HostGRPC, conf.PortGRPC),
 		server:  server,
 	}
 }

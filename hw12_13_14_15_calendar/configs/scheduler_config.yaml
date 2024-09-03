@@ -1,10 +1,10 @@
 
 mb:
   rmq:
-    host: "localhost"
+    host: "rabbitmq"
     port: 5672
-    user: "guest"
-    password: "guest"
+    user: "sergey"
+    password: "murashko"
     exchange: "calendar"
     exchangeType: "direct"
     routingKey: "calendar_routing_key"
@@ -12,9 +12,9 @@ mb:
 logger:
   level: "info"
 db:
-  host: "localhost"
+  host: "postgresql"
   port: 5432
-  user: "postgres"
-  password: "postgres"
+  user: "otus"
+  password: "otus"
   dbName: "calendar"
   inMemory: false

@@ -15,7 +15,7 @@ import (
 var configSchedulerFile string
 
 func init() {
-	flag.StringVar(&configSchedulerFile, "sheduler-conf", "./configs/scheduler_config.yaml", "Path to configuration file")
+	flag.StringVar(&configSchedulerFile, "scheduler-conf", "./configs/scheduler_config.yaml", "Path to configuration file")
 }
 
 func main() {

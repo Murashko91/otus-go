@@ -17,6 +17,6 @@ func getStorage(config config.DBConfig) storage.Storage {
 		Port:     config.Port,
 		User:     config.User,
 		Password: config.Password,
-		DBName:   config.Password,
+		DBName:   config.DBName,
 	})
 }

@@ -77,7 +77,7 @@ func (s *Sender) Run(ctx context.Context) {
 
 func handleDeliveries(s *Sender, deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
-		s.logger.Info(fmt.Printf("Got delivery,[%v] %q", d.DeliveryTag, d.Body))
+		s.logger.Info(fmt.Sprintf("Got delivery,[%v] %q", d.DeliveryTag, d.Body))
 
 		errAck := d.Ack(false)
 		if errAck != nil {

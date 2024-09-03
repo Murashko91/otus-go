@@ -1,14 +1,14 @@
 logger:
   level: "info"
 db:
-  host: "localhost"
+  host: "postgresql"
   port: 5432
-  user: "postgres"
-  password: "postgres"
+  user: "otus"
+  password: "otus"
   dbName: "calendar"
   inMemory: false
 server:
-  host: "localhost"
+  host: ""
   port: 7777
-  hostgrpc: "localhost"
+  hostgrpc: ""
   portgrpc: 8888

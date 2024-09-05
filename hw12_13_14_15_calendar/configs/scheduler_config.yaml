@@ -1,0 +1,20 @@
+
+mb:
+  rmq:
+    host: "localhost"
+    port: 5672
+    user: "guest"
+    password: "guest"
+    exchange: "calendar"
+    exchangeType: "direct"
+    routingKey: "calendar_routing_key"
+  intervalCheck: 5
+logger:
+  level: "info"
+db:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  dbName: "calendar"
+  inMemory: false

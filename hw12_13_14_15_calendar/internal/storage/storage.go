@@ -18,6 +18,12 @@ type Storage interface {
 	DeleteOutdatedEvents(context.Context) (int, error)
 }
 
+type SenderStorage interface {
+	Connect() error
+	Close() error
+	MarkEvent(context.Context, int) error
+}
+
 type Event struct {
 	ID        int       `db:"id"`
 	Title     string    `db:"title"`
@@ -25,4 +31,13 @@ type Event struct {
 	StartDate time.Time `db:"start_date"`
 	EndDate   time.Time `db:"end_date"`
 	UserID    int       `db:"user_id"`
+	IsSent    bool      `db:"sent"`
+}
+
+type Info struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	DBName   string
 }

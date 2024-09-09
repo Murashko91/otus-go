@@ -1,0 +1,12 @@
+logger:
+  level: "info"
+db:
+  host: "localhost"
+  port: 5455
+  user: "otus"
+  password: "otus"
+  dbName: "calendar"
+  inMemory: false
+server:
+  hostgrpc: "localhost"
+  portgrpc: 9992

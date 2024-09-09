@@ -2,6 +2,7 @@ package rmqs
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/murashko91/otus-go/hw12_13_14_15_calendar/internal/app"
@@ -13,17 +14,19 @@ import (
 
 type Sender struct {
 	conf    config.Sender
-	db      storage.Storage
+	db      storage.SenderStorage
 	logger  app.Logger
 	conn    *amqp.Connection
 	channel *amqp.Channel
+	ctx     context.Context
 }
 
-func NewSender(conf config.Sender, db storage.Storage, logger app.Logger) Sender {
+func NewSender(conf config.Sender, db storage.SenderStorage, logger app.Logger) Sender {
 	return Sender{conf: conf, db: db, logger: logger}
 }
 
 func (s *Sender) Run(ctx context.Context) {
+	s.ctx = ctx
 	connection, channel, err := rmq.SetupRMQ(s.conf.RMQ)
 	if err != nil {
 		s.logger.Error(err.Error())
@@ -79,9 +82,23 @@ func handleDeliveries(s *Sender, deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
 		s.logger.Info(fmt.Sprintf("Got delivery,[%v] %q", d.DeliveryTag, d.Body))
 
-		errAck := d.Ack(false)
+		errAck := d.Ack(true)
 		if errAck != nil {
 			s.logger.Warn(fmt.Sprintf("errAck delivery,[%s]", errAck))
+		}
+
+		var events []storage.Event
+
+		err := json.Unmarshal(d.Body, &events)
+		if err != nil {
+			s.logger.Error(fmt.Sprintf("err unmarshal delivery,[%s]", err.Error()))
+		}
+
+		for _, event := range events {
+			err = s.db.MarkEvent(s.ctx, event.ID)
+			if err != nil {
+				s.logger.Error(fmt.Sprintf("err mark sent events, [%s]", err.Error()))
+			}
 		}
 	}
 }

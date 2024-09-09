@@ -43,6 +43,10 @@ func (s *Storage) Close() error {
 }
 
 func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) (storage.Event, error) {
+	if event.StartDate.After(event.EndDate) {
+		return storage.Event{}, storage.NewWrongEventDatesError()
+	}
+
 	if err := checkUserID(ctx, event.UserID, "CreateEvent"); err != nil {
 		return event, err
 	}
@@ -129,7 +133,7 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, startDate time.Time) ([]s
 func (s *Storage) GetEventsToSend(ctx context.Context) ([]storage.Event, error) {
 	sql := `SELECT id, user_id, title, descr, start_date, end_date 
 	FROM events 
-	WHERE start_date < $1 AND  end_date > $1`
+	WHERE start_date < $1 AND  end_date > $1 AND sent = false`
 
 	rows, err := s.db.QueryxContext(ctx, sql, time.Now())
 	if err != nil {
@@ -175,7 +179,7 @@ func (s *Storage) getEvents(ctx context.Context, startDate time.Time, endDate ti
 		return []storage.Event{}, err
 	}
 
-	sql := `SELECT id, user_id, title, descr, start_date, end_date 
+	sql := `SELECT id, user_id, title, descr, start_date, end_date, sent
 	FROM events 
 	WHERE start_date > $1 AND  end_date < $2 and user_id = $3`
 

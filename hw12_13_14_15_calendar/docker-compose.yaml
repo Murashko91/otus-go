@@ -2,7 +2,7 @@ version: "3.9dodocker --ver"
 
 services:
   calendar-app:
-    image: calendar-app:develop
+    image: murashkosv91/calendar-app:latest
     depends_on:
       postgresql:
         condition: service_healthy
@@ -35,7 +35,7 @@ services:
         aliases:
           - postgresql
   scheduler-app:
-    image: scheduler-app:develop
+    image: murashkosv91/scheduler-app:latest
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -44,7 +44,7 @@ services:
         aliases:
           - scheduler
   sender-app:
-    image: sender-app:develop
+    image: murashkosv91/sender-app:latest
     depends_on:
       rabbitmq:
         condition: service_healthy

@@ -37,9 +37,6 @@ build-img:
 		-t $(SEN_DOCKER_IMG) \
 		-f build/sender/Dockerfile .
 
-run-img: build-img
-	docker run $(DOCKER_IMG)
-
 version: build
 	$(BIN) version
 
@@ -58,9 +55,10 @@ migrate-up:
 	goose -dir ./migrations postgres "$(psqlInfo)" up
 migrate-down:
 	goose -dir ./migrations postgres "$(psqlInfo)" down
-
 up:
 	docker compose -f docker-compose.yaml up -d 
+
+up-rebuild: build-img up
 
 down:
 	docker compose -f docker-compose.yaml down 
@@ -68,4 +66,4 @@ down:
 integration-tests:
 	go test -v ./test/integration/integration_test.go
 
-.PHONY: build run build-img run-img version test lint generate run-scheduler run-sender
+.PHONY: build run build-img version test lint generate run-scheduler run-sender up up-rebuild down integration-test

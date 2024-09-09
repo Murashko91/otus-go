@@ -7,8 +7,8 @@ services:
       postgresql:
         condition: service_healthy
     ports:
-      - 9991:7777
-      - 9992:8888
+      - 7777:7777
+      - 8888:8888
     networks:
       calendar:
         aliases:

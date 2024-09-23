@@ -43,9 +43,21 @@ func (s *Scheduler) Run(ctx context.Context) {
 			break
 		}
 
+		s.logger.Info("Removing outdated events...")
+		eventsCount, err := s.db.DeleteOutdatedEvents(ctx)
+		s.logger.Info("outdated events removed:", eventsCount)
+		if err != nil {
+			s.logger.Error("removing outdated events error", err.Error())
+		}
+
 		events, err := s.db.GetEventsToSend(ctx)
 		if err != nil {
 			s.logger.Error("error GetEventsToSend:", err.Error())
+			time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
+			continue
+		}
+
+		if len(events) == 0 {
 			time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
 			continue
 		}
@@ -74,12 +86,6 @@ func (s *Scheduler) Run(ctx context.Context) {
 			time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
 		}
 
-		s.logger.Info("Removing outdated events...")
-		eventsCount, err := s.db.DeleteOutdatedEvents(ctx)
-		s.logger.Info("outdated events removed:", eventsCount)
-		if err != nil {
-			s.logger.Error("removing outdated events error", err.Error())
-		}
 		time.Sleep(time.Second * time.Duration(s.conf.IntervalCheck))
 	}
 }

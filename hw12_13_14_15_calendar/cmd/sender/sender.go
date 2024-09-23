@@ -25,11 +25,12 @@ func main() {
 
 	storage := getStorage(config.Database)
 	logg := logger.New(config.Logger.Level)
-
+	defer storage.Close()
 	if err := storage.Connect(); err != nil {
 		logg.Error("failed to start storage: " + err.Error())
 		return
 	}
+	defer storage.Close()
 
 	sc := rmqs.NewSender(config.Sender, storage, logg)
 	defer sc.Cancel()

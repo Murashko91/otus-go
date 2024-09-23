@@ -1,7 +1,7 @@
 # Собираем в гошке
-FROM golang:1.19 as build
+FROM golang:1.22.2 as build
 
-ENV BIN_FILE /opt/calendar/calendar-app
+ENV BIN_FILE /bin/scheduler
 ENV CODE_DIR /go/src/
 
 WORKDIR ${CODE_DIR}
@@ -18,19 +18,19 @@ COPY . ${CODE_DIR}
 ARG LDFLAGS
 RUN CGO_ENABLED=0 go build \
         -ldflags "$LDFLAGS" \
-        -o ${BIN_FILE} cmd/calendar/*
+        -o ${BIN_FILE} cmd/scheduler/*
 
 # На выходе тонкий образ
-FROM alpine:3.9
+FROM alpine:3.12
 
 LABEL ORGANIZATION="OTUS Online Education"
-LABEL SERVICE="calendar"
+LABEL SERVICE="scheduler"
 LABEL MAINTAINERS="student@otus.ru"
 
-ENV BIN_FILE "/opt/calendar/calendar-app"
+ENV BIN_FILE "/bin/scheduler"
 COPY --from=build ${BIN_FILE} ${BIN_FILE}
 
-ENV CONFIG_FILE /etc/calendar/config.yaml
-COPY ./configs/config.yaml ${CONFIG_FILE}
+ENV CONFIG_FILE /etc/scheduler/scheduler_config.yaml
+COPY ./configs/scheduler_config.yaml ${CONFIG_FILE}
 
-CMD ${BIN_FILE} -config ${CONFIG_FILE}
+CMD ${BIN_FILE} -scheduler-conf ${CONFIG_FILE}

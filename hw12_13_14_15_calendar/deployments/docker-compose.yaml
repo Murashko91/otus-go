@@ -1,1 +1,12 @@
-version: "3"
+version: "3.9"
+services:
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "calendar"
+      POSTGRES_USER: "otus"
+      POSTGRES_PASSWORD: "otus"
+    volumes:
+      - ./migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5455:5432"

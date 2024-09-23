@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calendar-app
+  labels:
+    app: calendar-app
+spec:
+
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calendar-app
+  template:
+    metadata:
+      labels:
+        app: calendar-app
+    spec:
+      containers:
+      - name: calendar-app
+        image: murashkosv91/calendar-app:in-memory
+        ports:
+        - containerPort: 8888
+        - containerPort: 7777

@@ -27,3 +27,13 @@ func (e ErrMissedReqiredData) Error() string {
 func NewErrMissedReqiredData(fields []string) ErrMissedReqiredData {
 	return ErrMissedReqiredData{fields: fields}
 }
+
+type WrongEventDatesError struct{}
+
+func (e WrongEventDatesError) Error() string {
+	return "end date should not be before start date"
+}
+
+func NewWrongEventDatesError() WrongEventDatesError {
+	return WrongEventDatesError{}
+}

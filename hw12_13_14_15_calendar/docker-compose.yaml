@@ -1,0 +1,75 @@
+version: "3.9dodocker --ver"
+
+services:
+  calendar-app:
+    image: murashkosv91/calendar-app:latest
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    ports:
+      - 7777:7777
+      - 8888:8888
+    networks:
+      calendar:
+        aliases:
+          - calendar
+
+  postgresql:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "calendar"
+      POSTGRES_USER: "otus"
+      POSTGRES_PASSWORD: "otus"
+    volumes:
+      - ./migrations:/docker-entrypoint-initdb.d
+    ports:
+      - 5455:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U otus -d calendar"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      calendar:
+        aliases:
+          - postgresql
+  scheduler-app:
+    image: murashkosv91/scheduler-app:latest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      calendar:
+        aliases:
+          - scheduler
+  sender-app:
+    image: murashkosv91/sender-app:latest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      calendar:
+        aliases:
+          - sender
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    environment:
+      - RABBITMQ_DEFAULT_USER=sergey
+      - RABBITMQ_DEFAULT_PASS=murashko
+    ports:
+        - 5672:5672
+        - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 30s
+      timeout: 30s
+      retries: 10
+    networks:
+      calendar:
+        aliases:
+          - rabbitmq
+
+networks:
+  calendar:

@@ -1,0 +1,8 @@
+app:
+  name: calendar-app
+  replicas: 1
+
+image: murashkosv91/calendar-app:in-memory
+
+containerPortRest: 7777
+containerPortGRPC: 8888

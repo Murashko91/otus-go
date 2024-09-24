@@ -66,4 +66,9 @@ down:
 integration-tests:
 	go test -v ./test/integration/integration_test.go
 
-.PHONY: build run build-img version test lint generate run-scheduler run-sender up up-rebuild down integration-test
+helm-up:
+	helm install calendar-app k8s
+helm-down:
+	helm uninstall calendar-app
+
+.PHONY: build run build-img version test lint generate run-scheduler run-sender up up-rebuild down integration-test helm-up helm-down

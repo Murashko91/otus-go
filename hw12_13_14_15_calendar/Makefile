@@ -67,7 +67,7 @@ integration-tests:
 	go test -v ./test/integration/integration_test.go
 
 helm-up:
-	helm install calendar-app ks8
+	helm install calendar-app k8s
 helm-down:
 	helm uninstall calendar-app
 
